@@ -1,0 +1,66 @@
+-- TOGGLE SIÊU NHẸ 100% - BẬT = ON, TẮT = OFF HOÀN TOÀN
+local player = game.Players.LocalPlayer
+local VirtualUser = game:GetService("VirtualUser")
+local connection = nil
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "MinimalToggleGUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 80, 0, 60)
+main.Position = UDim2.new(0.5, 0, 0.4, 0)
+main.BackgroundColor3 = Color3.fromRGB(25,25,25)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+Instance.new("UICorner", main).CornerRadius = UDim.new(0.1,0)
+
+local toggleFrame = Instance.new("Frame", main)
+toggleFrame.Size = UDim2.new(0, 60, 0, 30)
+toggleFrame.Position = UDim2.new(0.5, -30, 0.5, -15)
+toggleFrame.BackgroundColor3 = Color3.fromRGB(100,100,100)
+toggleFrame.BorderSizePixel = 0
+Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(0.4,0)
+
+local knob = Instance.new("Frame", toggleFrame)
+knob.Size = UDim2.new(0, 26, 0, 26)
+knob.Position = UDim2.new(0, 2, 0.5, -13)
+knob.BackgroundColor3 = Color3.fromRGB(255,255,255)
+knob.BorderSizePixel = 0
+Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
+
+local btn = Instance.new("TextButton", toggleFrame)
+btn.Size = UDim2.new(1,0,1,0)
+btn.BackgroundTransparency = 1
+btn.TextTransparency = 1
+btn.Text = ""
+btn.ZIndex = 10
+
+local enabled = false
+
+btn.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    if enabled then
+        -- ON - CHỐNG AFK
+        toggleFrame.BackgroundColor3 = Color3.fromRGB(0,200,80)
+        knob:TweenPosition(UDim2.new(1, -28, 0.5, -13), "Out", "Quad", 0.15, true)
+        connection = game:GetService('Players').LocalPlayer.Idled:Connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+        end)
+    else
+        -- OFF HOÀN TOÀN
+        toggleFrame.BackgroundColor3 = Color3.fromRGB(100,100,100)
+        knob:TweenPosition(UDim2.new(0, 2, 0.5, -13), "Out", "Quad", 0.15, true)
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+    end
+end)
+
+btn.TouchTap:Connect(function()
+    btn.MouseButton1Click:Fire()
+end)
