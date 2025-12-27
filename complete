@@ -1,0 +1,182 @@
+-- Load Tora Library (New Version)
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/librarynew",true))()
+
+-- Create Window
+local tab = library:CreateWindow("Blind Shot")
+
+-- Create Tab/Folder
+local folder = tab:AddFolder("Esp V2.0")
+
+-- ESP Variables
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local localPlayer = Players.LocalPlayer
+
+local skinModels = {}
+local lasers = {}
+
+local LASER_COLOR = Color3.fromRGB(255, 0, 0)
+local LASER_WIDTH_SCALE = 1/12.5
+local LASER_HEIGHT_OFFSET = 0.5
+local LASER_SHORTEN = 0.50
+
+local espEnabled = false
+local espConnection = nil
+local descendantConnection = nil
+
+local function isHitbox(part)
+	local n = part.Name:lower()
+	if n:find("hitbox") or n == "hb" then
+		return true
+	end
+	if part.Size.Magnitude > 10 then
+		return true
+	end
+	return false
+end
+
+local function fixCharacter(character)
+	for _, obj in ipairs(character:GetDescendants()) do
+		if obj:IsA("BasePart") then
+			if obj.Name ~= "HumanoidRootPart" then
+				if isHitbox(obj) then
+					obj.Transparency = 1
+					obj.LocalTransparencyModifier = 1
+					obj.CanCollide = false
+				else
+					obj.Transparency = 0
+					obj.LocalTransparencyModifier = 0
+				end
+			end
+		elseif obj:IsA("Decal") then
+			obj.Transparency = 0
+		end
+	end
+end
+
+local function trackModel(model)
+	if skinModels[model] then return end
+	if model:IsA("Model") and model.Name:lower():sub(1,5) == "skin_" then
+		skinModels[model] = true
+		local laser = Instance.new("Part")
+		laser.Anchored = true
+		laser.CanCollide = false
+		laser.Material = Enum.Material.Neon
+		laser.Color = LASER_COLOR
+		laser.Transparency = 0
+		laser.Name = "SkinLaser"
+		laser.Parent = Workspace
+		lasers[model] = laser
+	end
+end
+
+local function getBoundingBox(model)
+	local cframe, size
+	pcall(function()
+		cframe, size = model:GetBoundingBox()
+	end)
+	return cframe, size
+end
+
+local function startESP()
+	for _, obj in ipairs(Workspace:GetDescendants()) do
+		trackModel(obj)
+	end
+
+	descendantConnection = Workspace.DescendantAdded:Connect(trackModel)
+
+	espConnection = RunService.RenderStepped:Connect(function()
+		if not espEnabled then return end
+		
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player ~= localPlayer then
+				local character = player.Character
+				if character and character.Parent then
+					fixCharacter(character)
+				end
+			end
+		end
+
+		for model, _ in pairs(skinModels) do
+			if model.Parent then
+				for _, part in ipairs(model:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.Transparency = 0
+						part.CanCollide = false
+						if part.Material == Enum.Material.ForceField then
+							part.Material = Enum.Material.SmoothPlastic
+						end
+					end
+				end
+
+				local laser = lasers[model]
+				if laser then
+					local cframe, size = getBoundingBox(model)
+					if cframe and size then
+						local laserSize = Vector3.new(size.X * LASER_WIDTH_SCALE, size.Y * LASER_WIDTH_SCALE, size.Z - LASER_SHORTEN*2)
+						laser.Size = laserSize
+
+						local front = cframe.Position + (cframe.LookVector * (size.Z/2 - LASER_SHORTEN))
+						local back = cframe.Position - (cframe.LookVector * (size.Z/2 - LASER_SHORTEN))
+						local centerLine = (front + back) / 2
+						centerLine = centerLine + Vector3.new(0, LASER_HEIGHT_OFFSET, 0)
+
+						laser.CFrame = CFrame.new(centerLine, centerLine + cframe.LookVector)
+					end
+				end
+			else
+				if lasers[model] then
+					lasers[model]:Destroy()
+					lasers[model] = nil
+				end
+				skinModels[model] = nil
+			end
+		end
+	end)
+end
+
+local function stopESP()
+	if espConnection then
+		espConnection:Disconnect()
+		espConnection = nil
+	end
+	
+	if descendantConnection then
+		descendantConnection:Disconnect()
+		descendantConnection = nil
+	end
+	
+	for model, laser in pairs(lasers) do
+		if laser then
+			laser:Destroy()
+		end
+	end
+	
+	lasers = {}
+	skinModels = {}
+end
+
+-- Add Toggle to Enable/Disable ESP
+folder:AddToggle({
+	text = "Enable ESP",
+	flag = "esp_toggle",
+	callback = function(v)
+		espEnabled = v
+		if espEnabled then
+			startESP()
+		else
+			stopESP()
+		end
+	end
+})
+
+-- Add Label with Credit
+folder:AddLabel({
+	text = "Tiktok : gr0k3_script",
+	type = "label"
+})
+
+-- Initialize the library (REQUIRED)
+library:Init()
