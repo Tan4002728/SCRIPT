@@ -22,7 +22,7 @@ local Event = ReplicatedStorage:WaitForChild("invisivel")
 
 -- See Players Toggle
 folder:AddToggle({
-    text = "See Players (Anti-Invis)",
+    text = "Anti Invis V2.5",
     flag = "SeePlayersToggle",
     callback = function(Value)
         _G.SeePlayers = Value
@@ -35,6 +35,62 @@ folder:AddToggle({
                         task.defer(function()
                             firesignal(Event.OnClientEvent, false)
                         end)
+                    end
+                end)
+            end
+            
+            -- Trigger ngay
+            task.spawn(function()
+                firesignal(Event.OnClientEvent, false)
+            end)
+        else
+            -- Tắt ESP
+            if eventConnection then
+                eventConnection:Disconnect()
+                eventConnection = nil
+            end
+            
+            -- Reset lại trạng thái về invisible
+            task.spawn(function()
+                firesignal(Event.OnClientEvent, true)
+            end)
+        end
+    end
+})
+
+-- Auto Lobby Toggle
+folder:AddToggle({
+    text = "Trophy Farm",
+    flag = "auto_lobby_toggle",
+    callback = function(value)
+        _G.TrophyFarm = value
+        if value then
+            spawn(function()
+                while _G.TrophyFarm do
+                    local char = localPlayer.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    local trophyPart = Workspace:FindFirstChild("Trophy", true)
+                    
+                    if trophyPart and hrp then
+                        firetouchinterest(hrp, trophyPart, 0)
+                        task.wait()
+                        firetouchinterest(hrp, trophyPart, 1)
+                    end
+                    task.wait(0.3)
+                end
+            end)
+        end
+    end
+})
+
+-- Add Label with Credit
+folder:AddLabel({
+    text = "Tiktok : gr0k3_script",
+    type = "label"
+})
+
+-- Initialize the library (REQUIRED)
+library:Init()                        end)
                     end
                 end)
             end
