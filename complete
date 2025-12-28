@@ -5,36 +5,92 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebe
 local tab = library:CreateWindow("Blind Shot")
 
 -- Create Tab/Folder
-local folder = tab:AddFolder("Esp V2.0")
+local folder = tab:AddFolder("Main")
 
 -- ESP Variables
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local localPlayer = Players.LocalPlayer
 
-local skinModels = {}
-local lasers = {}
+-- See Players Variable
+_G.SeePlayers = false
+local eventConnection = nil
+local Event = ReplicatedStorage:WaitForChild("invisivel")
 
-local LASER_COLOR = Color3.fromRGB(255, 0, 0)
-local LASER_WIDTH_SCALE = 1/12.5
-local LASER_HEIGHT_OFFSET = 0.5
-local LASER_SHORTEN = 0.50
+-- See Players Toggle
+folder:AddToggle({
+    text = "See Players (Anti-Invis)",
+    flag = "SeePlayersToggle",
+    callback = function(Value)
+        _G.SeePlayers = Value
+        
+        if Value then
+            -- Bật ESP
+            if not eventConnection then
+                eventConnection = Event.OnClientEvent:Connect(function(value)
+                    if _G.SeePlayers and value == true then
+                        task.defer(function()
+                            firesignal(Event.OnClientEvent, false)
+                        end)
+                    end
+                end)
+            end
+            
+            -- Trigger ngay
+            task.spawn(function()
+                firesignal(Event.OnClientEvent, false)
+            end)
+        else
+            -- Tắt ESP
+            if eventConnection then
+                eventConnection:Disconnect()
+                eventConnection = nil
+            end
+            
+            -- Reset lại trạng thái về invisible
+            task.spawn(function()
+                firesignal(Event.OnClientEvent, true)
+            end)
+        end
+    end
+})
 
-local espEnabled = false
-local espConnection = nil
-local descendantConnection = nil
+-- Trophy Farm Toggle
+folder:AddToggle({
+    text = "Trophy Farm",
+    flag = "trophy_farm_toggle",
+    callback = function(value)
+        _G.TrophyFarm = value
+        if value then
+            spawn(function()
+                while _G.TrophyFarm do
+                    local char = localPlayer.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    local trophyPart = Workspace:FindFirstChild("Trophy", true)
+                    
+                    if trophyPart and hrp then
+                        firetouchinterest(hrp, trophyPart, 0)
+                        task.wait()
+                        firetouchinterest(hrp, trophyPart, 1)
+                    end
+                    task.wait(0.3)
+                end
+            end)
+        end
+    end
+})
 
-local function isHitbox(part)
-	local n = part.Name:lower()
-	if n:find("hitbox") or n == "hb" then
-		return true
-	end
-	if part.Size.Magnitude > 10 then
-		return true
-	end
-	return false
+-- Add Label with Credit
+folder:AddLabel({
+    text = "Tiktok : gr0k3_script",
+    type = "label"
+})
+
+-- Initialize the library (REQUIRED)
+library:Init()	return false
 end
 
 local function fixCharacter(character)
