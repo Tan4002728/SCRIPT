@@ -10,7 +10,7 @@ local player = Players.LocalPlayer
 
 -- Keys Configuration
 local ADMIN_KEY = "Tan"
-local KEY_LINK = "https://graceful-cheesecake-3fc08f.netlify.app/"
+local KEY_LINK = "https://luminous-custard-13eb40.netlify.app/"
 local VALID_KEYS = {
     "XHAG001_8TQ3F", "XHAG002_R9B2K", "XHAG003_L7M4P", "XHAG004_W5Z1X", "XHAG005_C3N9V",
     "XHAG006_A2H8J", "XHAG007_Q6D4G", "XHAG008_Y1P7S", "XHAG009_F9K3M", "XHAG010_J4R6L",
