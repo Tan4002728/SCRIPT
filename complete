@@ -1,93 +1,585 @@
--- Load Tora Library (New Version)
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/librarynew",true))()
+--[[
+    PREMIUM KEY SYSTEM - HTML STYLE IN LUAU
+    Converted 1:1 from HTML version
+]]
 
--- Create Window
-local tab = library:CreateWindow("Blind Shot")
-
--- Create Tab/Folder
-local folder = tab:AddFolder("Main")
-
--- ESP Variables
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
 
-local localPlayer = Players.LocalPlayer
+-- Keys Configuration
+local ADMIN_KEY = "Tan"
+local KEY_LINK = "https://graceful-cheesecake-3fc08f.netlify.app/"
+local VALID_KEYS = {
+    "XHAG001_8TQ3F", "XHAG002_R9B2K", "XHAG003_L7M4P", "XHAG004_W5Z1X", "XHAG005_C3N9V",
+    "XHAG006_A2H8J", "XHAG007_Q6D4G", "XHAG008_Y1P7S", "XHAG009_F9K3M", "XHAG010_J4R6L",
+    "XHAG011_5X2T8", "XHAG012_9V7B1", "XHAG013_N3C5Q", "XHAG014_8Z6H2", "XHAG015_1M9P4",
+    "XHAG016_K7F3D", "XHAG017_S2L8W", "XHAG018_4J6R9", "XHAG019_G5T1N", "XHAG020_B3X7Q",
+    "XHAG021_6H9M2", "XHAG022_8P4Z1", "XHAG023_D7K3V", "XHAG024_R2F6Y", "XHAG025_9L1T5",
+    "XHAG026_3Q8B4", "XHAG027_C5N7J", "XHAG028_1V9H6", "XHAG029_M2X8G", "XHAG030_7Z4P3",
+    "XHAG031_K6T1B", "XHAG032_8R9F2", "XHAG033_J3D5Q", "XHAG034_4L7V9", "XHAG035_H2N6X",
+    "XHAG036_9M1P8", "XHAG037_5B3Z7", "XHAG038_Q4K2T", "XHAG039_F8C1R", "XHAG040_2X9J5",
+    "XHAG041_6V3H7", "XHAG042_T1M8G", "XHAG043_7P4D2", "XHAG044_B5F9Q", "XHAG045_3R6K1",
+    "XHAG046_N8Z4L", "XHAG047_J2T7V", "XHAG048_9C5X3", "XHAG049_1Q8B6", "XHAG050_H4M2F",
+    "XHAG051_7P9K5", "XHAG052_3D6R1", "XHAG053_G2V8T", "XHAG054_5Z4J9", "XHAG055_B1N7Q",
+    "XHAG056_8X6F3", "XHAG057_T9H2M", "XHAG058_4C5P8", "XHAG059_R7K1L", "XHAG060_2M9V6",
+    "XHAG061_J3F8Q", "XHAG062_5P1T4", "XHAG063_9B7Z2", "XHAG064_H6X3N", "XHAG065_8R4K9",
+    "XHAG066_1D5M7", "XHAG067_T2J8V", "XHAG068_4Q6F1", "XHAG069_7C3P5", "XHAG070_B9X2L",
+    "XHAG071_6Z8H4", "XHAG072_R1T3N", "XHAG073_J5F7K", "XHAG074_3M9V2", "XHAG075_8P4Q6",
+    "XHAG076_2B1X5", "XHAG077_T7K3M", "XHAG078_9R6J4", "XHAG079_5H2F8", "XHAG080_C1P7N",
+    "XHAG081_4Z3T9", "XHAG082_M8X5V", "XHAG083_6B2Q1", "XHAG084_R9F4K", "XHAG085_3J7H8",
+    "XHAG086_1T5N2", "XHAG087_P8M6X", "XHAG088_7C4Z3", "XHAG089_2Q9V1", "XHAG090_F5K8J",
+    "XHAG091_H3R6M", "XHAG092_9X2T4", "XHAG093_6B1P7", "XHAG094_N8F5Q", "XHAG095_4M3J9",
+    "XHAG096_R2T6V", "XHAG097_1Z7X8", "XHAG098_5K9H3", "XHAG099_J4F2M", "XHAG100_8Q6P1"
+}
 
--- See Players Variable
-_G.SeePlayers = false
-local eventConnection = nil
-local Event = ReplicatedStorage:WaitForChild("invisivel")
+-- Storage Functions
+local function loadStorage()
+    local success, result = pcall(function()
+        local savedKey = window.storage and window.storage.get("user_key") or nil
+        local timestamp = window.storage and window.storage.get("key_timestamp") or nil
+        local blacklist = window.storage and window.storage.get("key_blacklist") or nil
+        return {
+            savedKey = savedKey and savedKey.value or nil,
+            timestamp = timestamp and tonumber(timestamp.value) or 0,
+            blacklist = blacklist and game:GetService("HttpService"):JSONDecode(blacklist.value) or {}
+        }
+    end)
+    return success and result or {savedKey = nil, timestamp = 0, blacklist = {}}
+end
 
--- See Players Toggle
-folder:AddToggle({
-    text = "Anti Invis",
-    flag = "SeePlayersToggle",
-    callback = function(Value)
-        _G.SeePlayers = Value
+local function saveStorage(data)
+    pcall(function()
+        if window.storage then
+            if data.savedKey then window.storage.set("user_key", data.savedKey) end
+            if data.timestamp then window.storage.set("key_timestamp", tostring(data.timestamp)) end
+            if data.blacklist then window.storage.set("key_blacklist", game:GetService("HttpService"):JSONEncode(data.blacklist)) end
+        end
+    end)
+end
+
+local KeyData = loadStorage()
+
+local function isKeyExpired()
+    if not KeyData.timestamp or KeyData.timestamp == 0 then return true end
+    return (os.time() - KeyData.timestamp) >= 86400
+end
+
+local function isKeyBlacklisted(key)
+    for _, k in pairs(KeyData.blacklist) do
+        if k == key then return true end
+    end
+    return false
+end
+
+local function validateKey(key)
+    if key == ADMIN_KEY then return true, true end
+    for _, k in pairs(VALID_KEYS) do
+        if key == k then return true, false end
+    end
+    return false, false
+end
+
+-- Auto login check
+if KeyData.savedKey and KeyData.savedKey ~= ADMIN_KEY and not isKeyExpired() and not isKeyBlacklisted(KeyData.savedKey) then
+    print("✅ Already Authenticated")
+    return
+end
+
+if KeyData.savedKey and isKeyExpired() then
+    table.insert(KeyData.blacklist, KeyData.savedKey)
+    KeyData.savedKey = nil
+    KeyData.timestamp = 0
+    saveStorage(KeyData)
+end
+
+-- Create GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "KeySystemPremium"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Main Container
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+Main.Size = UDim2.new(0, 450, 0, 320)
+Main.Position = UDim2.new(0.5, -225, 0.5, -160)
+Main.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+Main.BorderSizePixel = 0
+Main.ClipsDescendants = true
+Main.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 8)
+MainCorner.Parent = Main
+
+-- Outer Glow Shadow
+local Shadow = Instance.new("ImageLabel")
+Shadow.Name = "Shadow"
+Shadow.Size = UDim2.new(1, 40, 1, 40)
+Shadow.Position = UDim2.new(0, -20, 0, -20)
+Shadow.BackgroundTransparency = 1
+Shadow.Image = "rbxassetid://5028857084"
+Shadow.ImageColor3 = Color3.fromRGB(0, 255, 150)
+Shadow.ImageTransparency = 0.7
+Shadow.ZIndex = 0
+Shadow.Parent = Main
+
+-- Animated Accent Line (Top)
+local AccentLine = Instance.new("Frame")
+AccentLine.Name = "AccentLine"
+AccentLine.Size = UDim2.new(1, 0, 0, 3)
+AccentLine.Position = UDim2.new(0, 0, 0, 0)
+AccentLine.BorderSizePixel = 0
+AccentLine.Parent = Main
+
+local AccentGradient = Instance.new("UIGradient")
+AccentGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 212, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(168, 85, 247))
+}
+AccentGradient.Parent = AccentLine
+
+-- Animate gradient
+spawn(function()
+    while AccentLine.Parent do
+        for i = 0, 360, 2 do
+            AccentGradient.Rotation = i
+            wait(0.02)
+        end
+    end
+end)
+
+-- Header Section
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, 0, 0, 70)
+Header.Position = UDim2.new(0, 0, 0, 3)
+Header.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
+Header.BorderSizePixel = 0
+Header.Parent = Main
+
+-- Icon
+local Icon = Instance.new("Frame")
+Icon.Name = "Icon"
+Icon.Size = UDim2.new(0, 45, 0, 45)
+Icon.Position = UDim2.new(0, 25, 0, 12.5)
+Icon.BorderSizePixel = 0
+Icon.Parent = Header
+
+local IconCorner = Instance.new("UICorner")
+IconCorner.CornerRadius = UDim.new(0, 6)
+IconCorner.Parent = Icon
+
+local IconGradient = Instance.new("UIGradient")
+IconGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 212, 255))
+}
+IconGradient.Rotation = 135
+IconGradient.Parent = Icon
+
+local IconLabel = Instance.new("TextLabel")
+IconLabel.Size = UDim2.new(1, 0, 1, 0)
+IconLabel.BackgroundTransparency = 1
+IconLabel.Text = "🔐"
+IconLabel.TextSize = 22
+IconLabel.Parent = Icon
+
+-- Title Section
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.new(1, -220, 0, 25)
+Title.Position = UDim2.new(0, 80, 0, 15)
+Title.BackgroundTransparency = 1
+Title.Text = "KEY SYSTEM"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Header
+
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Name = "Subtitle"
+Subtitle.Size = UDim2.new(1, -220, 0, 20)
+Subtitle.Position = UDim2.new(0, 80, 0, 40)
+Subtitle.BackgroundTransparency = 1
+Subtitle.Text = "Verify to continue"
+Subtitle.TextColor3 = Color3.fromRGB(136, 136, 136)
+Subtitle.TextSize = 12
+Subtitle.Font = Enum.Font.Gotham
+Subtitle.TextXAlignment = Enum.TextXAlignment.Left
+Subtitle.Parent = Header
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Name = "CloseBtn"
+CloseBtn.Size = UDim2.new(0, 35, 0, 35)
+CloseBtn.Position = UDim2.new(1, -55, 0, 17.5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+CloseBtn.Text = "×"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 20
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Parent = Header
+
+local CloseBtnCorner = Instance.new("UICorner")
+CloseBtnCorner.CornerRadius = UDim.new(0, 6)
+CloseBtnCorner.Parent = CloseBtn
+
+CloseBtn.MouseEnter:Connect(function()
+    TweenService:Create(CloseBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(255, 59, 59), Rotation = 90}):Play()
+end)
+
+CloseBtn.MouseLeave:Connect(function()
+    TweenService:Create(CloseBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(34, 34, 34), Rotation = 0}):Play()
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    TweenService:Create(Main, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+    wait(0.3)
+    ScreenGui:Destroy()
+end)
+
+-- Content Area
+local Content = Instance.new("Frame")
+Content.Name = "Content"
+Content.Size = UDim2.new(1, -60, 1, -143)
+Content.Position = UDim2.new(0, 30, 0, 103)
+Content.BackgroundTransparency = 1
+Content.Parent = Main
+
+-- Input Label
+local InputLabel = Instance.new("TextLabel")
+InputLabel.Name = "InputLabel"
+InputLabel.Size = UDim2.new(1, 0, 0, 20)
+InputLabel.BackgroundTransparency = 1
+InputLabel.Text = "KEY CODE"
+InputLabel.TextColor3 = Color3.fromRGB(136, 136, 136)
+InputLabel.TextSize = 11
+InputLabel.Font = Enum.Font.GothamBold
+InputLabel.TextXAlignment = Enum.TextXAlignment.Left
+InputLabel.Parent = Content
+
+-- Key Input
+local KeyInput = Instance.new("TextBox")
+KeyInput.Name = "KeyInput"
+KeyInput.Size = UDim2.new(1, 0, 0, 45)
+KeyInput.Position = UDim2.new(0, 0, 0, 30)
+KeyInput.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
+KeyInput.PlaceholderText = "Enter your key here..."
+KeyInput.PlaceholderColor3 = Color3.fromRGB(85, 85, 85)
+KeyInput.Text = ""
+KeyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyInput.TextSize = 14
+KeyInput.Font = Enum.Font.Gotham
+KeyInput.TextXAlignment = Enum.TextXAlignment.Left
+KeyInput.ClearTextOnFocus = false
+KeyInput.BorderSizePixel = 1
+KeyInput.BorderColor3 = Color3.fromRGB(42, 42, 42)
+KeyInput.Parent = Content
+
+local KeyInputCorner = Instance.new("UICorner")
+KeyInputCorner.CornerRadius = UDim.new(0, 6)
+KeyInputCorner.Parent = KeyInput
+
+local KeyInputPadding = Instance.new("UIPadding")
+KeyInputPadding.PaddingLeft = UDim.new(0, 15)
+KeyInputPadding.PaddingRight = UDim.new(0, 15)
+KeyInputPadding.Parent = KeyInput
+
+KeyInput.Focused:Connect(function()
+    TweenService:Create(KeyInput, TweenInfo.new(0.3), {BorderColor3 = Color3.fromRGB(0, 255, 150)}):Play()
+end)
+
+KeyInput.FocusLost:Connect(function()
+    TweenService:Create(KeyInput, TweenInfo.new(0.3), {BorderColor3 = Color3.fromRGB(42, 42, 42)}):Play()
+end)
+
+-- Button Container
+local ButtonContainer = Instance.new("Frame")
+ButtonContainer.Name = "ButtonContainer"
+ButtonContainer.Size = UDim2.new(1, 0, 0, 48)
+ButtonContainer.Position = UDim2.new(0, 0, 0, 90)
+ButtonContainer.BackgroundTransparency = 1
+ButtonContainer.Parent = Content
+
+-- Get Key Button (Outline Style)
+local GetKeyBtn = Instance.new("TextButton")
+GetKeyBtn.Name = "GetKeyBtn"
+GetKeyBtn.Size = UDim2.new(0.48, 0, 1, 0)
+GetKeyBtn.Position = UDim2.new(0, 0, 0, 0)
+GetKeyBtn.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
+GetKeyBtn.Text = "🔗 GET KEY"
+GetKeyBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+GetKeyBtn.TextSize = 13
+GetKeyBtn.Font = Enum.Font.GothamBold
+GetKeyBtn.BorderSizePixel = 0
+GetKeyBtn.Parent = ButtonContainer
+
+local GetKeyBorder = Instance.new("UIStroke")
+GetKeyBorder.Color = Color3.fromRGB(60, 60, 60)
+GetKeyBorder.Thickness = 2
+GetKeyBorder.Parent = GetKeyBtn
+
+local GetKeyCorner = Instance.new("UICorner")
+GetKeyCorner.CornerRadius = UDim.new(0, 6)
+GetKeyCorner.Parent = GetKeyBtn
+
+GetKeyBtn.MouseEnter:Connect(function()
+    TweenService:Create(GetKeyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
+    TweenService:Create(GetKeyBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(200, 200, 200)}):Play()
+    TweenService:Create(GetKeyBorder, TweenInfo.new(0.2), {Color = Color3.fromRGB(100, 100, 100)}):Play()
+end)
+
+GetKeyBtn.MouseLeave:Connect(function()
+    TweenService:Create(GetKeyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(26, 26, 26)}):Play()
+    TweenService:Create(GetKeyBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150, 150, 150)}):Play()
+    TweenService:Create(GetKeyBorder, TweenInfo.new(0.2), {Color = Color3.fromRGB(60, 60, 60)}):Play()
+end)
+
+-- Check Key Button (Gradient Style)
+local CheckKeyBtn = Instance.new("TextButton")
+CheckKeyBtn.Name = "CheckKeyBtn"
+CheckKeyBtn.Size = UDim2.new(0.48, 0, 1, 0)
+CheckKeyBtn.Position = UDim2.new(0.52, 0, 0, 0)
+CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+CheckKeyBtn.Text = "✓ CHECK KEY"
+CheckKeyBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+CheckKeyBtn.TextSize = 13
+CheckKeyBtn.Font = Enum.Font.GothamBold
+CheckKeyBtn.BorderSizePixel = 0
+CheckKeyBtn.Parent = ButtonContainer
+
+local CheckKeyCorner = Instance.new("UICorner")
+CheckKeyCorner.CornerRadius = UDim.new(0, 6)
+CheckKeyCorner.Parent = CheckKeyBtn
+
+local CheckKeyGradient = Instance.new("UIGradient")
+CheckKeyGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 212, 255))
+}
+CheckKeyGradient.Rotation = 135
+CheckKeyGradient.Parent = CheckKeyBtn
+
+CheckKeyBtn.MouseEnter:Connect(function()
+    TweenService:Create(CheckKeyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 255, 170)}):Play()
+end)
+
+CheckKeyBtn.MouseLeave:Connect(function()
+    TweenService:Create(CheckKeyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 150)}):Play()
+end)
+
+-- Status Message
+local StatusMessage = Instance.new("TextLabel")
+StatusMessage.Name = "StatusMessage"
+StatusMessage.Size = UDim2.new(1, 0, 0, 40)
+StatusMessage.Position = UDim2.new(0, 0, 0, 153)
+StatusMessage.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+StatusMessage.BackgroundTransparency = 0.85
+StatusMessage.BorderSizePixel = 1
+StatusMessage.BorderColor3 = Color3.fromRGB(0, 255, 150)
+StatusMessage.Text = ""
+StatusMessage.TextColor3 = Color3.fromRGB(0, 255, 150)
+StatusMessage.TextSize = 13
+StatusMessage.Font = Enum.Font.GothamBold
+StatusMessage.Visible = false
+StatusMessage.Parent = Content
+
+local StatusCorner = Instance.new("UICorner")
+StatusCorner.CornerRadius = UDim.new(0, 6)
+StatusCorner.Parent = StatusMessage
+
+-- Loading Spinner
+local LoadingFrame = Instance.new("Frame")
+LoadingFrame.Name = "Loading"
+LoadingFrame.Size = UDim2.new(1, 0, 0, 60)
+LoadingFrame.Position = UDim2.new(0, 0, 0, 145)
+LoadingFrame.BackgroundTransparency = 1
+LoadingFrame.Visible = false
+LoadingFrame.Parent = Content
+
+local Spinner = Instance.new("Frame")
+Spinner.Name = "Spinner"
+Spinner.Size = UDim2.new(0, 40, 0, 40)
+Spinner.Position = UDim2.new(0.5, -20, 0.5, -20)
+Spinner.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+Spinner.BorderSizePixel = 3
+Spinner.BorderColor3 = Color3.fromRGB(0, 255, 150)
+Spinner.Parent = LoadingFrame
+
+local SpinnerCorner = Instance.new("UICorner")
+SpinnerCorner.CornerRadius = UDim.new(1, 0)
+SpinnerCorner.Parent = Spinner
+
+local SpinnerGradient = Instance.new("UIGradient")
+SpinnerGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(34, 34, 34))
+}
+SpinnerGradient.Parent = Spinner
+
+spawn(function()
+    while Spinner.Parent do
+        for i = 0, 360, 6 do
+            SpinnerGradient.Rotation = i
+            wait(0.01)
+        end
+    end
+end)
+
+-- Footer
+local Footer = Instance.new("Frame")
+Footer.Name = "Footer"
+Footer.Size = UDim2.new(1, 0, 0, 47)
+Footer.Position = UDim2.new(0, 0, 1, -47)
+Footer.BackgroundColor3 = Color3.fromRGB(13, 13, 13)
+Footer.BorderSizePixel = 0
+Footer.Parent = Main
+
+local FooterText = Instance.new("TextLabel")
+FooterText.Size = UDim2.new(1, 0, 1, 0)
+FooterText.BackgroundTransparency = 1
+FooterText.Text = "Protected by Advanced Key System"
+FooterText.TextColor3 = Color3.fromRGB(85, 85, 85)
+FooterText.TextSize = 11
+FooterText.Font = Enum.Font.Gotham
+FooterText.Parent = Footer
+
+-- Functions
+local function showStatus(text, statusType)
+    -- Expand GUI to fit status message
+    TweenService:Create(Main, TweenInfo.new(0.3), {Size = UDim2.new(0, 450, 0, 370)}):Play()
+    
+    StatusMessage.Text = text
+    StatusMessage.Visible = true
+    
+    if statusType == "success" then
+        StatusMessage.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+        StatusMessage.BorderColor3 = Color3.fromRGB(0, 255, 150)
+        StatusMessage.TextColor3 = Color3.fromRGB(0, 255, 150)
+        StatusMessage.BackgroundTransparency = 0.85
+    elseif statusType == "error" then
+        StatusMessage.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+        StatusMessage.BorderColor3 = Color3.fromRGB(255, 80, 80)
+        StatusMessage.TextColor3 = Color3.fromRGB(255, 80, 80)
+        StatusMessage.BackgroundTransparency = 0.85
+    elseif statusType == "admin" then
+        StatusMessage.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+        StatusMessage.BorderColor3 = Color3.fromRGB(255, 215, 0)
+        StatusMessage.TextColor3 = Color3.fromRGB(255, 215, 0)
+        StatusMessage.BackgroundTransparency = 0.85
+    end
+    
+    StatusMessage.Position = UDim2.new(0, 0, 0, 163)
+    TweenService:Create(StatusMessage, TweenInfo.new(0.3), {Position = UDim2.new(0, 0, 0, 153)}):Play()
+    
+    wait(3)
+    TweenService:Create(StatusMessage, TweenInfo.new(0.4), {Position = UDim2.new(0, 0, 0, 163)}):Play()
+    wait(0.4)
+    StatusMessage.Visible = false
+    
+    -- Shrink GUI back
+    TweenService:Create(Main, TweenInfo.new(0.3), {Size = UDim2.new(0, 450, 0, 320)}):Play()
+end
+
+GetKeyBtn.MouseButton1Click:Connect(function()
+    setclipboard(KEY_LINK)
+    showStatus("Link copied to clipboard!", "success")
+end)
+
+CheckKeyBtn.MouseButton1Click:Connect(function()
+    local key = KeyInput.Text:gsub("%s+", "")
+    
+    if key == "" then
+        showStatus("Please enter a key!", "error")
+        return
+    end
+    
+    if isKeyBlacklisted(key) then
+        showStatus("This key has expired!", "error")
+        return
+    end
+    
+    local valid, admin = validateKey(key)
+    
+    if valid then
+        -- Expand for loading
+        TweenService:Create(Main, TweenInfo.new(0.3), {Size = UDim2.new(0, 450, 0, 370)}):Play()
+        LoadingFrame.Visible = true
+        StatusMessage.Visible = false
         
-        if Value then
-            -- Bật ESP
-            if not eventConnection then
-                eventConnection = Event.OnClientEvent:Connect(function(value)
-                    if _G.SeePlayers and value == true then
-                        task.defer(function()
-                            firesignal(Event.OnClientEvent, false)
-                        end)
-                    end
-                end)
-            end
-            
-            -- Trigger ngay
-            task.spawn(function()
-                firesignal(Event.OnClientEvent, false)
-            end)
+        wait(0.8)
+        
+        LoadingFrame.Visible = false
+        
+        if admin then
+            showStatus("★ ADMIN ACCESS GRANTED", "admin")
+            print("👑 Admin Authenticated")
         else
-            -- Tắt ESP
-            if eventConnection then
-                eventConnection:Disconnect()
-                eventConnection = nil
+            KeyData.savedKey = key
+            KeyData.timestamp = os.time()
+            saveStorage(KeyData)
+            showStatus("✓ Key verified! Access granted", "success")
+            print("✅ User Authenticated")
+        end
+        
+                wait(1)
+        TweenService:Create(Main, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+        wait(0.3)
+        ScreenGui:Destroy()
+        
+        -- YOUR SCRIPT CODE HERE
+        wait(0.1) -- Chờ 3 giây
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Tan4002728/SCRIPT/refs/heads/main/Tora", true))()
+        
+    else
+        showStatus("❌ Invalid key!", "error")
+    end
+end)
+
+-- Enter key support
+KeyInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        CheckKeyBtn.MouseButton1Click:Fire()
+    end
+end)
+
+-- Draggable
+local dragging, dragInput, dragStart, startPos
+
+Main.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Main.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
             end
-            
-            -- Reset lại trạng thái về invisible
-            task.spawn(function()
-                firesignal(Event.OnClientEvent, true)
-            end)
-        end
+        end)
     end
-})
+end)
 
--- Auto Lobby Toggle
-folder:AddToggle({
-    text = "Trophy Farm",
-    flag = "auto_lobby_toggle",
-    callback = function(value)
-        _G.TrophyFarm = value
-        if value then
-            spawn(function()
-                while _G.TrophyFarm do
-                    local char = localPlayer.Character
-                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                    local trophyPart = Workspace:FindFirstChild("Trophy", true)
-                    
-                    if trophyPart and hrp then
-                        firetouchinterest(hrp, trophyPart, 0)
-                        task.wait()
-                        firetouchinterest(hrp, trophyPart, 1)
-                    end
-                    task.wait(0.3)
-                end
-            end)
-        end
+Main.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
     end
-})
+end)
 
--- Add Label with Credit
-folder:AddLabel({
-    text = "Tiktok : gr0k3_script",
-    type = "label"
-})
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
 
--- Initialize the library (REQUIRED)
-library:Init()
+-- Parent and Entrance Animation
+ScreenGui.Parent = game:GetService("CoreGui")
+
+Main.Size = UDim2.new(0, 0, 0, 0)
+TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 450, 0, 320)}):Play()
