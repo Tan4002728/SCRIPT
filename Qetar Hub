@@ -1,0 +1,562 @@
+-- Qetar Hub GUI
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- Tạo ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "QetarHubGUI"
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 999999
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Main Window - VỊ TRÍ BAN ĐẦU
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 450, 0, 400)
+MainFrame.Position = UDim2.new(0, 20, 0.5, -200) -- Vị trí ban đầu
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
+
+-- Top Bar
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Size = UDim2.new(1, 0, 0, 35)
+TopBar.Position = UDim2.new(0, 0, 0, 0)
+TopBar.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainFrame
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "QETAR HUB"
+Title.TextColor3 = Color3.fromRGB(0, 170, 255)
+Title.TextSize = 18
+Title.Font = Enum.Font.Code
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TopBar
+
+-- Nút Minus (-)
+local MinusButton = Instance.new("TextButton")
+MinusButton.Name = "MinusButton"
+MinusButton.Size = UDim2.new(0, 35, 0, 35)
+MinusButton.Position = UDim2.new(1, -70, 0, 0)
+MinusButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MinusButton.BorderSizePixel = 0
+MinusButton.Text = "-"
+MinusButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinusButton.TextSize = 20
+MinusButton.Font = Enum.Font.Code
+MinusButton.Parent = TopBar
+
+-- Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Size = UDim2.new(0, 35, 0, 35)
+CloseButton.Position = UDim2.new(1, -35, 0, 0)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+CloseButton.BorderSizePixel = 0
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 16
+CloseButton.Font = Enum.Font.Code
+CloseButton.Parent = TopBar
+
+-- Tab Buttons Container
+local TabButtonsContainer = Instance.new("Frame")
+TabButtonsContainer.Name = "TabButtonsContainer"
+TabButtonsContainer.Size = UDim2.new(0, 100, 1, -35)
+TabButtonsContainer.Position = UDim2.new(0, 0, 0, 35)
+TabButtonsContainer.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+TabButtonsContainer.BorderSizePixel = 0
+TabButtonsContainer.Parent = MainFrame
+
+-- Content Container
+local ContentContainer = Instance.new("Frame")
+ContentContainer.Name = "ContentContainer"
+ContentContainer.Size = UDim2.new(1, -100, 1, -35)
+ContentContainer.Position = UDim2.new(0, 100, 0, 35)
+ContentContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ContentContainer.BorderSizePixel = 0
+ContentContainer.Parent = MainFrame
+
+-- Tạo các Tab
+local Tabs = {"Player", "Creator"}
+local TabContents = {}
+local SelectedTab = "Player"
+
+-- Tạo Tab Buttons
+for i, tabName in ipairs(Tabs) do
+    local TabButton = Instance.new("TextButton")
+    TabButton.Name = tabName .. "Tab"
+    TabButton.Size = UDim2.new(1, 0, 0, 40)
+    TabButton.Position = UDim2.new(0, 0, 0, (i-1) * 45)
+    TabButton.BackgroundColor3 = tabName == "Player" and Color3.fromRGB(0, 100, 200) or Color3.fromRGB(18, 18, 18)
+    TabButton.BorderSizePixel = 0
+    TabButton.Text = tabName
+    TabButton.TextColor3 = tabName == "Player" and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 150, 150)
+    TabButton.TextSize = 14
+    TabButton.Font = Enum.Font.Code
+    TabButton.Parent = TabButtonsContainer
+    
+    local TabContent = Instance.new("ScrollingFrame")
+    TabContent.Name = tabName .. "Content"
+    TabContent.Size = UDim2.new(1, 0, 1, 0)
+    TabContent.Position = UDim2.new(0, 0, 0, 0)
+    TabContent.BackgroundTransparency = 1
+    TabContent.BorderSizePixel = 0
+    TabContent.ScrollBarThickness = 3
+    TabContent.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255)
+    TabContent.Visible = (tabName == "Player")
+    TabContent.Parent = ContentContainer
+    
+    TabContent.CanvasSize = UDim2.new(0, 0, 0, 500)
+    TabContents[tabName] = TabContent
+    
+    TabButton.MouseButton1Click:Connect(function()
+        SelectedTab = tabName
+        
+        for _, btnName in ipairs(Tabs) do
+            local btn = TabButtonsContainer:FindFirstChild(btnName .. "Tab")
+            if btn then
+                if btnName == tabName then
+                    btn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+                    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                else
+                    btn.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+                    btn.TextColor3 = Color3.fromRGB(150, 150, 150)
+                end
+            end
+        end
+        
+        for _, contentTabName in ipairs(Tabs) do
+            local content = TabContents[contentTabName]
+            if content then
+                content.Visible = (contentTabName == tabName)
+            end
+        end
+    end)
+end
+
+-- LOGIC VARIABLES
+local SpeedEnabled = false
+local SpeedValue = 16
+local JumpEnabled = false
+local ESPEnabled = false
+local ESPHighlights = {}
+
+-- TAB PLAYER
+local PlayerContent = TabContents["Player"]
+
+-- Speed Hack Section
+local SpeedSection = Instance.new("Frame")
+SpeedSection.Name = "SpeedSection"
+SpeedSection.Size = UDim2.new(0.9, 0, 0, 90)
+SpeedSection.Position = UDim2.new(0.05, 0, 0, 20)
+SpeedSection.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+SpeedSection.BorderSizePixel = 0
+SpeedSection.Parent = PlayerContent
+
+local SpeedTitle = Instance.new("TextLabel")
+SpeedTitle.Name = "SpeedTitle"
+SpeedTitle.Size = UDim2.new(0.6, 0, 0, 30)
+SpeedTitle.Position = UDim2.new(0, 10, 0, 0)
+SpeedTitle.BackgroundTransparency = 1
+SpeedTitle.Text = "SPEED HACK"
+SpeedTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+SpeedTitle.TextSize = 14
+SpeedTitle.Font = Enum.Font.Code
+SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+SpeedTitle.Parent = SpeedSection
+
+local SpeedToggle = Instance.new("TextButton")
+SpeedToggle.Name = "SpeedToggle"
+SpeedToggle.Size = UDim2.new(0, 60, 0, 25)
+SpeedToggle.Position = UDim2.new(1, -70, 0, 5)
+SpeedToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+SpeedToggle.BorderSizePixel = 0
+SpeedToggle.Text = "OFF"
+SpeedToggle.TextColor3 = Color3.fromRGB(255, 50, 50)
+SpeedToggle.TextSize = 12
+SpeedToggle.Font = Enum.Font.Code
+SpeedToggle.Parent = SpeedSection
+
+-- INPUT BOX CHO SPEED
+local SpeedInputBox = Instance.new("TextBox")
+SpeedInputBox.Name = "SpeedInputBox"
+SpeedInputBox.Size = UDim2.new(0.6, 0, 0, 30)
+SpeedInputBox.Position = UDim2.new(0.05, 0, 0.5, 0)
+SpeedInputBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+SpeedInputBox.BorderSizePixel = 0
+SpeedInputBox.Text = "16"
+SpeedInputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedInputBox.TextSize = 14
+SpeedInputBox.Font = Enum.Font.Code
+SpeedInputBox.PlaceholderText = "16-300"
+SpeedInputBox.TextXAlignment = Enum.TextXAlignment.Center
+SpeedInputBox.Parent = SpeedSection
+
+-- Infinite Jump Section
+local JumpSection = Instance.new("Frame")
+JumpSection.Name = "JumpSection"
+JumpSection.Size = UDim2.new(0.9, 0, 0, 60)
+JumpSection.Position = UDim2.new(0.05, 0, 0, 130)
+JumpSection.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+JumpSection.BorderSizePixel = 0
+JumpSection.Parent = PlayerContent
+
+local JumpTitle = Instance.new("TextLabel")
+JumpTitle.Name = "JumpTitle"
+JumpTitle.Size = UDim2.new(0.7, 0, 0, 30)
+JumpTitle.Position = UDim2.new(0, 10, 0, 0)
+JumpTitle.BackgroundTransparency = 1
+JumpTitle.Text = "INFINITE JUMP"
+JumpTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+JumpTitle.TextSize = 14
+JumpTitle.Font = Enum.Font.Code
+JumpTitle.TextXAlignment = Enum.TextXAlignment.Left
+JumpTitle.Parent = JumpSection
+
+local JumpToggle = Instance.new("TextButton")
+JumpToggle.Name = "JumpToggle"
+JumpToggle.Size = UDim2.new(0, 60, 0, 25)
+JumpToggle.Position = UDim2.new(1, -70, 0, 5)
+JumpToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+JumpToggle.BorderSizePixel = 0
+JumpToggle.Text = "OFF"
+JumpToggle.TextColor3 = Color3.fromRGB(255, 50, 50)
+JumpToggle.TextSize = 12
+JumpToggle.Font = Enum.Font.Code
+JumpToggle.Parent = JumpSection
+
+-- ESP Section
+local ESPSection = Instance.new("Frame")
+ESPSection.Name = "ESPSection"
+ESPSection.Size = UDim2.new(0.9, 0, 0, 60)
+ESPSection.Position = UDim2.new(0.05, 0, 0, 210)
+ESPSection.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+ESPSection.BorderSizePixel = 0
+ESPSection.Parent = PlayerContent
+
+local ESPTitle = Instance.new("TextLabel")
+ESPTitle.Name = "ESPTitle"
+ESPTitle.Size = UDim2.new(0.7, 0, 0, 30)
+ESPTitle.Position = UDim2.new(0, 10, 0, 0)
+ESPTitle.BackgroundTransparency = 1
+ESPTitle.Text = "ESP"
+ESPTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+ESPTitle.TextSize = 14
+ESPTitle.Font = Enum.Font.Code
+ESPTitle.TextXAlignment = Enum.TextXAlignment.Left
+ESPTitle.Parent = ESPSection
+
+local ESPToggle = Instance.new("TextButton")
+ESPToggle.Name = "ESPToggle"
+ESPToggle.Size = UDim2.new(0, 60, 0, 25)
+ESPToggle.Position = UDim2.new(1, -70, 0, 5)
+ESPToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+ESPToggle.BorderSizePixel = 0
+ESPToggle.Text = "OFF"
+ESPToggle.TextColor3 = Color3.fromRGB(255, 50, 50)
+ESPToggle.TextSize = 12
+ESPToggle.Font = Enum.Font.Code
+ESPToggle.Parent = ESPSection
+
+-- TAB CREATOR
+local CreatorContent = TabContents["Creator"]
+
+local CreatorBox = Instance.new("Frame")
+CreatorBox.Name = "CreatorBox"
+CreatorBox.Size = UDim2.new(0.9, 0, 0.8, 0)
+CreatorBox.Position = UDim2.new(0.05, 0, 0.1, 0)
+CreatorBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+CreatorBox.BorderSizePixel = 0
+CreatorBox.Parent = CreatorContent
+
+local CreatorTitle = Instance.new("TextLabel")
+CreatorTitle.Name = "CreatorTitle"
+CreatorTitle.Size = UDim2.new(1, 0, 0, 40)
+CreatorTitle.Position = UDim2.new(0, 0, 0, 20)
+CreatorTitle.BackgroundTransparency = 1
+CreatorTitle.Text = "CREATOR INFO"
+CreatorTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+CreatorTitle.TextSize = 18
+CreatorTitle.Font = Enum.Font.Code
+CreatorTitle.Parent = CreatorBox
+
+local CreatorName = Instance.new("TextLabel")
+CreatorName.Name = "CreatorName"
+CreatorName.Size = UDim2.new(1, 0, 0, 30)
+CreatorName.Position = UDim2.new(0, 0, 0, 70)
+CreatorName.BackgroundTransparency = 1
+CreatorName.Text = "Gr0k3_script"
+CreatorName.TextColor3 = Color3.fromRGB(255, 255, 255)
+CreatorName.TextSize = 16
+CreatorName.Font = Enum.Font.Code
+CreatorName.Parent = CreatorBox
+
+local TikTokText = Instance.new("TextLabel")
+TikTokText.Name = "TikTokText"
+TikTokText.Size = UDim2.new(1, 0, 0, 30)
+TikTokText.Position = UDim2.new(0, 0, 0, 110)
+TikTokText.BackgroundTransparency = 1
+TikTokText.Text = "TikTok: @Gr0k3_script"
+TikTokText.TextColor3 = Color3.fromRGB(150, 150, 150)
+TikTokText.TextSize = 14
+TikTokText.Font = Enum.Font.Code
+TikTokText.Parent = CreatorBox
+
+local VersionText = Instance.new("TextLabel")
+VersionText.Name = "VersionText"
+VersionText.Size = UDim2.new(1, 0, 0, 30)
+VersionText.Position = UDim2.new(0, 0, 0, 150)
+VersionText.BackgroundTransparency = 1
+VersionText.Text = "Qetar Hub v1.0"
+VersionText.TextColor3 = Color3.fromRGB(100, 100, 100)
+VersionText.TextSize = 12
+VersionText.Font = Enum.Font.Code
+VersionText.Parent = CreatorBox
+
+-- LOGIC VARIABLES
+local JumpConnection = nil
+
+-- CHỈNH TỐC ĐỘ QUA INPUT BOX
+local function UpdateSpeed()
+    if SpeedEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = SpeedValue
+    end
+end
+
+-- Input box thay đổi
+SpeedInputBox.FocusLost:Connect(function(enterPressed)
+    local text = SpeedInputBox.Text
+    local num = tonumber(text)
+    
+    if num then
+        SpeedValue = math.clamp(num, 16, 300)
+        SpeedInputBox.Text = tostring(SpeedValue)
+        UpdateSpeed()
+    else
+        SpeedInputBox.Text = tostring(SpeedValue)
+    end
+end)
+
+-- Speed Hack Logic
+SpeedToggle.MouseButton1Click:Connect(function()
+    SpeedEnabled = not SpeedEnabled
+    
+    if SpeedEnabled then
+        SpeedToggle.Text = "ON"
+        SpeedToggle.TextColor3 = Color3.fromRGB(0, 255, 0)
+        SpeedToggle.BackgroundColor3 = Color3.fromRGB(30, 100, 30)
+        UpdateSpeed()
+        
+        player.CharacterAdded:Connect(function(char)
+            task.wait(0.5)
+            if char:FindFirstChild("Humanoid") and SpeedEnabled then
+                char.Humanoid.WalkSpeed = SpeedValue
+            end
+        end)
+    else
+        SpeedToggle.Text = "OFF"
+        SpeedToggle.TextColor3 = Color3.fromRGB(255, 50, 50)
+        SpeedToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = 16
+        end
+    end
+end)
+
+-- FIXED INFINITE JUMP LOGIC
+JumpToggle.MouseButton1Click:Connect(function()
+    JumpEnabled = not JumpEnabled
+    
+    if JumpEnabled then
+        JumpToggle.Text = "ON"
+        JumpToggle.TextColor3 = Color3.fromRGB(0, 255, 0)
+        JumpToggle.BackgroundColor3 = Color3.fromRGB(30, 100, 30)
+        
+        -- Lưu connection
+        JumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+            if player.Character and player.Character:FindFirstChild("Humanoid") and JumpEnabled then
+                player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end)
+    else
+        JumpToggle.Text = "OFF"
+        JumpToggle.TextColor3 = Color3.fromRGB(255, 50, 50)
+        JumpToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        
+        -- Ngắt kết nối
+        if JumpConnection then
+            JumpConnection:Disconnect()
+            JumpConnection = nil
+        end
+    end
+end)
+
+-- ESP Logic
+ESPToggle.MouseButton1Click:Connect(function()
+    ESPEnabled = not ESPEnabled
+    
+    if ESPEnabled then
+        ESPToggle.Text = "ON"
+        ESPToggle.TextColor3 = Color3.fromRGB(0, 255, 0)
+        ESPToggle.BackgroundColor3 = Color3.fromRGB(30, 100, 30)
+        UpdateESP()
+        
+        Players.PlayerAdded:Connect(function(newPlayer)
+            if ESPEnabled then
+                task.wait(1)
+                UpdateESP()
+            end
+        end)
+    else
+        ESPToggle.Text = "OFF"
+        ESPToggle.TextColor3 = Color3.fromRGB(255, 50, 50)
+        ESPToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        
+        for _, highlight in pairs(ESPHighlights) do
+            highlight:Destroy()
+        end
+        ESPHighlights = {}
+    end
+end)
+
+function UpdateESP()
+    if not ESPEnabled then return end
+    
+    for _, highlight in pairs(ESPHighlights) do
+        highlight:Destroy()
+    end
+    ESPHighlights = {}
+    
+    for _, otherPlayer in pairs(Players:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer.Character then
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "ESP_" .. otherPlayer.Name
+            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+            highlight.FillTransparency = 0.5
+            highlight.OutlineTransparency = 0
+            highlight.Adornee = otherPlayer.Character
+            highlight.Parent = otherPlayer.Character
+            
+            ESPHighlights[otherPlayer.Name] = highlight
+            
+            otherPlayer.CharacterAdded:Connect(function(char)
+                if ESPEnabled then
+                    task.wait(0.5)
+                    local newHighlight = Instance.new("Highlight")
+                    newHighlight.Name = "ESP_" .. otherPlayer.Name
+                    newHighlight.FillColor = Color3.fromRGB(255, 0, 0)
+                    newHighlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    newHighlight.FillTransparency = 0.5
+                    newHighlight.OutlineTransparency = 0
+                    newHighlight.Adornee = char
+                    newHighlight.Parent = char
+                    
+                    ESPHighlights[otherPlayer.Name] = newHighlight
+                end
+            end)
+        end
+    end
+end
+
+-- GUI DRAGGING BÌNH THƯỜNG
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+-- PC dragging
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- Mobile touch dragging
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.Touch then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+-- Nút Minus (-)
+local isMinimized = false
+MinusButton.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    
+    if isMinimized then
+        MainFrame.Size = UDim2.new(0, 200, 0, 35)
+        MinusButton.Text = "+"
+    else
+        MainFrame.Size = UDim2.new(0, 450, 0, 400)
+        MinusButton.Text = "-"
+    end
+end)
+
+-- Close Button
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- F9 Toggle
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.F9 and not gameProcessed then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+print("Qetar Hub loaded! Press F9 to toggle GUI")
