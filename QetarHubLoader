@@ -1,0 +1,1683 @@
+-- Qetar Hub GUI vá»›i Hiá»‡u á»¨ng
+
+local Players = game:GetService("Players")
+
+local UserInputService = game:GetService("UserInputService")
+
+local TweenService = game:GetService("TweenService")
+
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- Táº¡o ScreenGui
+
+local ScreenGui = Instance.new("ScreenGui")
+
+ScreenGui.Name = "QetarHubGUI"
+
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+ScreenGui.ResetOnSpawn = false
+
+ScreenGui.DisplayOrder = 999999
+
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Main Window - Vá» TRĂ BAN Äáº¦U
+
+local MainFrame = Instance.new("Frame")
+
+MainFrame.Name = "MainFrame"
+
+MainFrame.Size = UDim2.new(0, 450, 0, 400)
+
+MainFrame.Position = UDim2.new(0, 20, 0.5, -200) -- Vá»‹ trĂ­ ban Ä‘áº§u
+
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+
+MainFrame.BorderSizePixel = 0
+
+MainFrame.ClipsDescendants = true
+
+MainFrame.Parent = ScreenGui
+
+-- ===== HIá»†U á»¨NG: Viá»n sĂ¡ng xung quanh MainFrame =====
+
+local MainFrameGlow = Instance.new("UIStroke")
+
+MainFrameGlow.Name = "GlowEffect"
+
+MainFrameGlow.Color = Color3.fromRGB(0, 170, 255)
+
+MainFrameGlow.Thickness = 2
+
+MainFrameGlow.Transparency = 0.3
+
+MainFrameGlow.Parent = MainFrame
+
+-- Hiá»‡u á»©ng bo trĂ²n gĂ³c
+
+local MainFrameCorner = Instance.new("UICorner")
+
+MainFrameCorner.CornerRadius = UDim.new(0, 8)
+
+MainFrameCorner.Parent = MainFrame
+
+-- Hiá»‡u á»©ng fade in khi má»Ÿ GUI
+
+MainFrame.BackgroundTransparency = 1
+
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+
+TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+
+    Size = UDim2.new(0, 450, 0, 400),
+
+    BackgroundTransparency = 0
+
+}):Play()
+
+-- Top Bar
+
+local TopBar = Instance.new("Frame")
+
+TopBar.Name = "TopBar"
+
+TopBar.Size = UDim2.new(1, 0, 0, 35)
+
+TopBar.Position = UDim2.new(0, 0, 0, 0)
+
+TopBar.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+
+TopBar.BorderSizePixel = 0
+
+TopBar.Parent = MainFrame
+
+local TopBarCorner = Instance.new("UICorner")
+
+TopBarCorner.CornerRadius = UDim.new(0, 8)
+
+TopBarCorner.Parent = TopBar
+
+-- Title vá»›i hiá»‡u á»©ng gradient
+
+local Title = Instance.new("TextLabel")
+
+Title.Name = "Title"
+
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+
+Title.Position = UDim2.new(0, 10, 0, 0)
+
+Title.BackgroundTransparency = 1
+
+Title.Text = "QETAR HUB"
+
+Title.TextColor3 = Color3.fromRGB(0, 170, 255)
+
+Title.TextSize = 18
+
+Title.Font = Enum.Font.Code
+
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+Title.Parent = TopBar
+
+-- Hiá»‡u á»©ng nháº¥p nhĂ¡y cho Title
+
+spawn(function()
+
+    while wait(2) do
+
+        if Title and Title.Parent then
+
+            TweenService:Create(Title, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+
+                TextColor3 = Color3.fromRGB(0, 255, 255)
+
+            }):Play()
+
+            wait(0.8)
+
+            TweenService:Create(Title, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+
+                TextColor3 = Color3.fromRGB(0, 170, 255)
+
+            }):Play()
+
+        end
+
+    end
+
+end)
+
+-- NĂºt Minus vá»›i hiá»‡u á»©ng hover
+
+local MinusButton = Instance.new("TextButton")
+
+MinusButton.Name = "MinusButton"
+
+MinusButton.Size = UDim2.new(0, 35, 0, 35)
+
+MinusButton.Position = UDim2.new(1, -70, 0, 0)
+
+MinusButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+MinusButton.BorderSizePixel = 0
+
+MinusButton.Text = "-"
+
+MinusButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+MinusButton.TextSize = 20
+
+MinusButton.Font = Enum.Font.Code
+
+MinusButton.Parent = TopBar
+
+local MinusCorner = Instance.new("UICorner")
+
+MinusCorner.CornerRadius = UDim.new(0, 6)
+
+MinusCorner.Parent = MinusButton
+
+-- Hover effect cho Minus
+
+MinusButton.MouseEnter:Connect(function()
+
+    TweenService:Create(MinusButton, TweenInfo.new(0.2), {
+
+        BackgroundColor3 = Color3.fromRGB(80, 80, 80),
+
+        Size = UDim2.new(0, 38, 0, 38)
+
+    }):Play()
+
+end)
+
+MinusButton.MouseLeave:Connect(function()
+
+    TweenService:Create(MinusButton, TweenInfo.new(0.2), {
+
+        BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+
+        Size = UDim2.new(0, 35, 0, 35)
+
+    }):Play()
+
+end)
+
+-- Close Button vá»›i hiá»‡u á»©ng hover
+
+local CloseButton = Instance.new("TextButton")
+
+CloseButton.Name = "CloseButton"
+
+CloseButton.Size = UDim2.new(0, 35, 0, 35)
+
+CloseButton.Position = UDim2.new(1, -35, 0, 0)
+
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+
+CloseButton.BorderSizePixel = 0
+
+CloseButton.Text = "X"
+
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+CloseButton.TextSize = 16
+
+CloseButton.Font = Enum.Font.Code
+
+CloseButton.Parent = TopBar
+
+local CloseCorner = Instance.new("UICorner")
+
+CloseCorner.CornerRadius = UDim.new(0, 6)
+
+CloseCorner.Parent = CloseButton
+
+-- Hover effect cho Close
+
+CloseButton.MouseEnter:Connect(function()
+
+    TweenService:Create(CloseButton, TweenInfo.new(0.2), {
+
+        BackgroundColor3 = Color3.fromRGB(255, 100, 100),
+
+        Size = UDim2.new(0, 38, 0, 38),
+
+        Rotation = 90
+
+    }):Play()
+
+end)
+
+CloseButton.MouseLeave:Connect(function()
+
+    TweenService:Create(CloseButton, TweenInfo.new(0.2), {
+
+        BackgroundColor3 = Color3.fromRGB(255, 50, 50),
+
+        Size = UDim2.new(0, 35, 0, 35),
+
+        Rotation = 0
+
+    }):Play()
+
+end)
+
+-- Tab Buttons Container
+
+local TabButtonsContainer = Instance.new("Frame")
+
+TabButtonsContainer.Name = "TabButtonsContainer"
+
+TabButtonsContainer.Size = UDim2.new(0, 100, 1, -35)
+
+TabButtonsContainer.Position = UDim2.new(0, 0, 0, 35)
+
+TabButtonsContainer.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+
+TabButtonsContainer.BorderSizePixel = 0
+
+TabButtonsContainer.Parent = MainFrame
+
+-- Content Container
+
+local ContentContainer = Instance.new("Frame")
+
+ContentContainer.Name = "ContentContainer"
+
+ContentContainer.Size = UDim2.new(1, -100, 1, -35)
+
+ContentContainer.Position = UDim2.new(0, 100, 0, 35)
+
+ContentContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
+ContentContainer.BorderSizePixel = 0
+
+ContentContainer.Parent = MainFrame
+
+-- Táº¡o cĂ¡c Tab
+
+local Tabs = {"Player", "Creator"}
+
+local TabContents = {}
+
+local SelectedTab = "Player"
+
+-- Táº¡o Tab Buttons vá»›i hiá»‡u á»©ng
+
+for i, tabName in ipairs(Tabs) do
+
+    local TabButton = Instance.new("TextButton")
+
+    TabButton.Name = tabName .. "Tab"
+
+    TabButton.Size = UDim2.new(1, 0, 0, 40)
+
+    TabButton.Position = UDim2.new(0, 0, 0, (i-1) * 45)
+
+    TabButton.BackgroundColor3 = tabName == "Player" and Color3.fromRGB(0, 100, 200) or Color3.fromRGB(18, 18, 18)
+
+    TabButton.BorderSizePixel = 0
+
+    TabButton.Text = tabName
+
+    TabButton.TextColor3 = tabName == "Player" and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 150, 150)
+
+    TabButton.TextSize = 14
+
+    TabButton.Font = Enum.Font.Code
+
+    TabButton.Parent = TabButtonsContainer
+
+    
+
+    -- Hiá»‡u á»©ng viá»n cho tab button
+
+    local TabStroke = Instance.new("UIStroke")
+
+    TabStroke.Color = Color3.fromRGB(0, 170, 255)
+
+    TabStroke.Thickness = tabName == "Player" and 2 or 0
+
+    TabStroke.Transparency = 0.5
+
+    TabStroke.Parent = TabButton
+
+    
+
+    local TabCorner = Instance.new("UICorner")
+
+    TabCorner.CornerRadius = UDim.new(0, 4)
+
+    TabCorner.Parent = TabButton
+
+    
+
+    -- Hover effect cho tab buttons
+
+    TabButton.MouseEnter:Connect(function()
+
+        if SelectedTab ~= tabName then
+
+            TweenService:Create(TabButton, TweenInfo.new(0.2), {
+
+                BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+            }):Play()
+
+        end
+
+    end)
+
+    
+
+    TabButton.MouseLeave:Connect(function()
+
+        if SelectedTab ~= tabName then
+
+            TweenService:Create(TabButton, TweenInfo.new(0.2), {
+
+                BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+
+            }):Play()
+
+        end
+
+    end)
+
+    
+
+    local TabContent = Instance.new("ScrollingFrame")
+
+    TabContent.Name = tabName .. "Content"
+
+    TabContent.Size = UDim2.new(1, 0, 1, 0)
+
+    TabContent.Position = UDim2.new(0, 0, 0, 0)
+
+    TabContent.BackgroundTransparency = 1
+
+    TabContent.BorderSizePixel = 0
+
+    TabContent.ScrollBarThickness = 3
+
+    TabContent.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255)
+
+    TabContent.Visible = (tabName == "Player")
+
+    TabContent.Parent = ContentContainer
+
+    
+
+    TabContent.CanvasSize = UDim2.new(0, 0, 0, 500)
+
+    TabContents[tabName] = TabContent
+
+    
+
+    TabButton.MouseButton1Click:Connect(function()
+
+        SelectedTab = tabName
+
+        
+
+        for _, btnName in ipairs(Tabs) do
+
+            local btn = TabButtonsContainer:FindFirstChild(btnName .. "Tab")
+
+            if btn then
+
+                local btnStroke = btn:FindFirstChild("UIStroke")
+
+                if btnName == tabName then
+
+                    TweenService:Create(btn, TweenInfo.new(0.3), {
+
+                        BackgroundColor3 = Color3.fromRGB(0, 100, 200),
+
+                        TextColor3 = Color3.fromRGB(255, 255, 255)
+
+                    }):Play()
+
+                    if btnStroke then
+
+                        TweenService:Create(btnStroke, TweenInfo.new(0.3), {
+
+                            Thickness = 2
+
+                        }):Play()
+
+                    end
+
+                else
+
+                    TweenService:Create(btn, TweenInfo.new(0.3), {
+
+                        BackgroundColor3 = Color3.fromRGB(18, 18, 18),
+
+                        TextColor3 = Color3.fromRGB(150, 150, 150)
+
+                    }):Play()
+
+                    if btnStroke then
+
+                        TweenService:Create(btnStroke, TweenInfo.new(0.3), {
+
+                            Thickness = 0
+
+                        }):Play()
+
+                    end
+
+                end
+
+            end
+
+        end
+
+        
+
+        for _, contentTabName in ipairs(Tabs) do
+
+            local content = TabContents[contentTabName]
+
+            if content then
+
+                content.Visible = (contentTabName == tabName)
+
+                if contentTabName == tabName then
+
+                    content.Position = UDim2.new(0, -50, 0, 0)
+
+                    TweenService:Create(content, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+
+                        Position = UDim2.new(0, 0, 0, 0)
+
+                    }):Play()
+
+                end
+
+            end
+
+        end
+
+    end)
+
+end
+
+-- LOGIC VARIABLES
+
+local SpeedEnabled = false
+
+local SpeedValue = 16
+
+local JumpEnabled = false
+
+local ESPEnabled = false
+
+local ESPHighlights = {}
+
+-- TAB PLAYER
+
+local PlayerContent = TabContents["Player"]
+
+-- Speed Hack Section vá»›i hiá»‡u á»©ng
+
+local SpeedSection = Instance.new("Frame")
+
+SpeedSection.Name = "SpeedSection"
+
+SpeedSection.Size = UDim2.new(0.9, 0, 0, 90)
+
+SpeedSection.Position = UDim2.new(0.05, 0, 0, 20)
+
+SpeedSection.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+
+SpeedSection.BorderSizePixel = 0
+
+SpeedSection.Parent = PlayerContent
+
+local SpeedCorner = Instance.new("UICorner")
+
+SpeedCorner.CornerRadius = UDim.new(0, 6)
+
+SpeedCorner.Parent = SpeedSection
+
+local SpeedStroke = Instance.new("UIStroke")
+
+SpeedStroke.Color = Color3.fromRGB(0, 170, 255)
+
+SpeedStroke.Thickness = 1
+
+SpeedStroke.Transparency = 0.7
+
+SpeedStroke.Parent = SpeedSection
+
+local SpeedTitle = Instance.new("TextLabel")
+
+SpeedTitle.Name = "SpeedTitle"
+
+SpeedTitle.Size = UDim2.new(0.6, 0, 0, 30)
+
+SpeedTitle.Position = UDim2.new(0, 10, 0, 0)
+
+SpeedTitle.BackgroundTransparency = 1
+
+SpeedTitle.Text = "SPEED HACK"
+
+SpeedTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+
+SpeedTitle.TextSize = 14
+
+SpeedTitle.Font = Enum.Font.Code
+
+SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+SpeedTitle.Parent = SpeedSection
+
+local SpeedToggle = Instance.new("TextButton")
+
+SpeedToggle.Name = "SpeedToggle"
+
+SpeedToggle.Size = UDim2.new(0, 60, 0, 25)
+
+SpeedToggle.Position = UDim2.new(1, -70, 0, 5)
+
+SpeedToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+SpeedToggle.BorderSizePixel = 0
+
+SpeedToggle.Text = "OFF"
+
+SpeedToggle.TextColor3 = Color3.fromRGB(255, 50, 50)
+
+SpeedToggle.TextSize = 12
+
+SpeedToggle.Font = Enum.Font.Code
+
+SpeedToggle.Parent = SpeedSection
+
+local SpeedToggleCorner = Instance.new("UICorner")
+
+SpeedToggleCorner.CornerRadius = UDim.new(0, 4)
+
+SpeedToggleCorner.Parent = SpeedToggle
+
+-- Hover effect cho SpeedToggle
+
+SpeedToggle.MouseEnter:Connect(function()
+
+    TweenService:Create(SpeedToggle, TweenInfo.new(0.2), {
+
+        Size = UDim2.new(0, 65, 0, 28)
+
+    }):Play()
+
+end)
+
+SpeedToggle.MouseLeave:Connect(function()
+
+    TweenService:Create(SpeedToggle, TweenInfo.new(0.2), {
+
+        Size = UDim2.new(0, 60, 0, 25)
+
+    }):Play()
+
+end)
+
+local SpeedInputBox = Instance.new("TextBox")
+
+SpeedInputBox.Name = "SpeedInputBox"
+
+SpeedInputBox.Size = UDim2.new(0.6, 0, 0, 30)
+
+SpeedInputBox.Position = UDim2.new(0.05, 0, 0.5, 0)
+
+SpeedInputBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+
+SpeedInputBox.BorderSizePixel = 0
+
+SpeedInputBox.Text = "16"
+
+SpeedInputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+SpeedInputBox.TextSize = 14
+
+SpeedInputBox.Font = Enum.Font.Code
+
+SpeedInputBox.PlaceholderText = "16-300"
+
+SpeedInputBox.TextXAlignment = Enum.TextXAlignment.Center
+
+SpeedInputBox.Parent = SpeedSection
+
+local SpeedInputCorner = Instance.new("UICorner")
+
+SpeedInputCorner.CornerRadius = UDim.new(0, 4)
+
+SpeedInputCorner.Parent = SpeedInputBox
+
+-- Infinite Jump Section vá»›i hiá»‡u á»©ng
+
+local JumpSection = Instance.new("Frame")
+
+JumpSection.Name = "JumpSection"
+
+JumpSection.Size = UDim2.new(0.9, 0, 0, 60)
+
+JumpSection.Position = UDim2.new(0.05, 0, 0, 130)
+
+JumpSection.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+
+JumpSection.BorderSizePixel = 0
+
+JumpSection.Parent = PlayerContent
+
+local JumpCorner = Instance.new("UICorner")
+
+JumpCorner.CornerRadius = UDim.new(0, 6)
+
+JumpCorner.Parent = JumpSection
+
+local JumpStroke = Instance.new("UIStroke")
+
+JumpStroke.Color = Color3.fromRGB(0, 170, 255)
+
+JumpStroke.Thickness = 1
+
+JumpStroke.Transparency = 0.7
+
+JumpStroke.Parent = JumpSection
+
+local JumpTitle = Instance.new("TextLabel")
+
+JumpTitle.Name = "JumpTitle"
+
+JumpTitle.Size = UDim2.new(0.7, 0, 0, 30)
+
+JumpTitle.Position = UDim2.new(0, 10, 0, 0)
+
+JumpTitle.BackgroundTransparency = 1
+
+JumpTitle.Text = "INFINITE JUMP"
+
+JumpTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+
+JumpTitle.TextSize = 14
+
+JumpTitle.Font = Enum.Font.Code
+
+JumpTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+JumpTitle.Parent = JumpSection
+
+local JumpToggle = Instance.new("TextButton")
+
+JumpToggle.Name = "JumpToggle"
+
+JumpToggle.Size = UDim2.new(0, 60, 0, 25)
+
+JumpToggle.Position = UDim2.new(1, -70, 0, 5)
+
+JumpToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+JumpToggle.BorderSizePixel = 0
+
+JumpToggle.Text = "OFF"
+
+JumpToggle.TextColor3 = Color3.fromRGB(255, 50, 50)
+
+JumpToggle.TextSize = 12
+
+JumpToggle.Font = Enum.Font.Code
+
+JumpToggle.Parent = JumpSection
+
+local JumpToggleCorner = Instance.new("UICorner")
+
+JumpToggleCorner.CornerRadius = UDim.new(0, 4)
+
+JumpToggleCorner.Parent = JumpToggle
+
+-- Hover effect cho JumpToggle
+
+JumpToggle.MouseEnter:Connect(function()
+
+    TweenService:Create(JumpToggle, TweenInfo.new(0.2), {
+
+        Size = UDim2.new(0, 65, 0, 28)
+
+    }):Play()
+
+end)
+
+JumpToggle.MouseLeave:Connect(function()
+
+    TweenService:Create(JumpToggle, TweenInfo.new(0.2), {
+
+        Size = UDim2.new(0, 60, 0, 25)
+
+    }):Play()
+
+end)
+
+-- ESP Section vá»›i hiá»‡u á»©ng
+
+local ESPSection = Instance.new("Frame")
+
+ESPSection.Name = "ESPSection"
+
+ESPSection.Size = UDim2.new(0.9, 0, 0, 60)
+
+ESPSection.Position = UDim2.new(0.05, 0, 0, 210)
+
+ESPSection.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+
+ESPSection.BorderSizePixel = 0
+
+ESPSection.Parent = PlayerContent
+
+local ESPCorner = Instance.new("UICorner")
+
+ESPCorner.CornerRadius = UDim.new(0, 6)
+
+ESPCorner.Parent = ESPSection
+
+local ESPStroke = Instance.new("UIStroke")
+
+ESPStroke.Color = Color3.fromRGB(0, 170, 255)
+
+ESPStroke.Thickness = 1
+
+ESPStroke.Transparency = 0.7
+
+ESPStroke.Parent = ESPSection
+
+local ESPTitle = Instance.new("TextLabel")
+
+ESPTitle.Name = "ESPTitle"
+
+ESPTitle.Size = UDim2.new(0.7, 0, 0, 30)
+
+ESPTitle.Position = UDim2.new(0, 10, 0, 0)
+
+ESPTitle.BackgroundTransparency = 1
+
+ESPTitle.Text = "ESP"
+
+ESPTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+
+ESPTitle.TextSize = 14
+
+ESPTitle.Font = Enum.Font.Code
+
+ESPTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+ESPTitle.Parent = ESPSection
+
+local ESPToggle = Instance.new("TextButton")
+
+ESPToggle.Name = "ESPToggle"
+
+ESPToggle.Size = UDim2.new(0, 60, 0, 25)
+
+ESPToggle.Position = UDim2.new(1, -70, 0, 5)
+
+ESPToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+ESPToggle.BorderSizePixel = 0
+
+ESPToggle.Text = "OFF"
+
+ESPToggle.TextColor3 = Color3.fromRGB(255, 50, 50)
+
+ESPToggle.TextSize = 12
+
+ESPToggle.Font = Enum.Font.Code
+
+ESPToggle.Parent = ESPSection
+
+local ESPToggleCorner = Instance.new("UICorner")
+
+ESPToggleCorner.CornerRadius = UDim.new(0, 4)
+
+ESPToggleCorner.Parent = ESPToggle
+
+-- Hover effect cho ESPToggle
+
+ESPToggle.MouseEnter:Connect(function()
+
+    TweenService:Create(ESPToggle, TweenInfo.new(0.2), {
+
+        Size = UDim2.new(0, 65, 0, 28)
+
+    }):Play()
+
+end)
+
+ESPToggle.MouseLeave:Connect(function()
+
+    TweenService:Create(ESPToggle, TweenInfo.new(0.2), {
+
+        Size = UDim2.new(0, 60, 0, 25)
+
+    }):Play()
+
+end)
+
+-- TAB CREATOR vá»›i hiá»‡u á»©ng
+
+local CreatorContent = TabContents["Creator"]
+
+local CreatorBox = Instance.new("Frame")
+
+CreatorBox.Name = "CreatorBox"
+
+CreatorBox.Size = UDim2.new(0.9, 0, 0.8, 0)
+
+CreatorBox.Position = UDim2.new(0.05, 0, 0.1, 0)
+
+CreatorBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+
+CreatorBox.BorderSizePixel = 0
+
+CreatorBox.Parent = CreatorContent
+
+local CreatorCorner = Instance.new("UICorner")
+
+CreatorCorner.CornerRadius = UDim.new(0, 8)
+
+CreatorCorner.Parent = CreatorBox
+
+local CreatorStroke = Instance.new("UIStroke")
+
+CreatorStroke.Color = Color3.fromRGB(0, 170, 255)
+
+CreatorStroke.Thickness = 2
+
+CreatorStroke.Transparency = 0.5
+
+CreatorStroke.Parent = CreatorBox
+
+local CreatorTitle = Instance.new("TextLabel")
+
+CreatorTitle.Name = "CreatorTitle"
+
+CreatorTitle.Size = UDim2.new(1, 0, 0, 40)
+
+CreatorTitle.Position = UDim2.new(0, 0, 0, 20)
+
+CreatorTitle.BackgroundTransparency = 1
+
+CreatorTitle.Text = "CREATOR INFO"
+
+CreatorTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+
+CreatorTitle.TextSize = 18
+
+CreatorTitle.Font = Enum.Font.Code
+
+CreatorTitle.Parent = CreatorBox
+
+local CreatorName = Instance.new("TextLabel")
+
+CreatorName.Name = "CreatorName"
+
+CreatorName.Size = UDim2.new(1, 0, 0, 30)
+
+CreatorName.Position = UDim2.new(0, 0, 0, 70)
+
+CreatorName.BackgroundTransparency = 1
+
+CreatorName.Text = "@QetarHub"
+
+CreatorName.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+CreatorName.TextSize = 16
+
+CreatorName.Font = Enum.Font.Code
+
+CreatorName.Parent = CreatorBox
+
+local TikTokText = Instance.new("TextLabel")
+
+TikTokText.Name = "TikTokText"
+
+TikTokText.Size = UDim2.new(1, 0, 0, 30)
+
+TikTokText.Position = UDim2.new(0, 0, 0, 110)
+
+TikTokText.BackgroundTransparency = 1
+
+TikTokText.Text = "TikTok: @QetarHub"
+
+TikTokText.TextColor3 = Color3.fromRGB(150, 150, 150)
+
+TikTokText.TextSize = 14
+
+TikTokText.Font = Enum.Font.Code
+
+TikTokText.Parent = CreatorBox
+
+local VersionText = Instance.new("TextLabel")
+
+VersionText.Name = "VersionText"
+
+VersionText.Size = UDim2.new(1, 0, 0, 30)
+
+VersionText.Position = UDim2.new(0, 0, 0, 150)
+
+VersionText.BackgroundTransparency = 1
+
+VersionText.Text = "Qetar Hub v1.0"
+
+VersionText.TextColor3 = Color3.fromRGB(100, 100, 100)
+
+VersionText.TextSize = 12
+
+VersionText.Font = Enum.Font.Code
+
+VersionText.Parent = CreatorBox
+
+-- LOGIC VARIABLES
+
+local JumpConnection = nil
+
+local function UpdateSpeed()
+
+    if SpeedEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
+
+        player.Character.Humanoid.WalkSpeed = SpeedValue
+
+    end
+
+end
+
+SpeedInputBox.FocusLost:Connect(function(enterPressed)
+
+    local text = SpeedInputBox.Text
+
+    local num = tonumber(text)
+
+    
+
+    if num then
+
+        SpeedValue = math.clamp(num, 16, 300)
+
+        SpeedInputBox.Text = tostring(SpeedValue)
+
+        UpdateSpeed()
+
+    else
+
+        SpeedInputBox.Text = tostring(SpeedValue)
+
+    end
+
+end)
+
+-- Speed Hack Logic vá»›i hiá»‡u á»©ng
+
+SpeedToggle.MouseButton1Click:Connect(function()
+
+    SpeedEnabled = not SpeedEnabled
+
+    
+
+    if SpeedEnabled then
+
+        TweenService:Create(SpeedToggle, TweenInfo.new(0.3), {
+
+            BackgroundColor3 = Color3.fromRGB(30, 100, 30),
+
+            TextColor3 = Color3.fromRGB(0, 255, 0)
+
+        }):Play()
+
+        TweenService:Create(SpeedStroke, TweenInfo.new(0.3), {
+
+            Color = Color3.fromRGB(0, 255, 0),
+
+            Thickness = 2
+
+        }):Play()
+
+        SpeedToggle.Text = "ON"
+
+        UpdateSpeed()
+
+        
+
+        player.CharacterAdded:Connect(function(char)
+
+            task.wait(0.5)
+
+            if char:FindFirstChild("Humanoid") and SpeedEnabled then
+
+                char.Humanoid.WalkSpeed = SpeedValue
+
+            end
+
+        end)
+
+    else
+
+        TweenService:Create(SpeedToggle, TweenInfo.new(0.3), {
+
+            BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+
+            TextColor3 = Color3.fromRGB(255, 50, 50)
+
+        }):Play()
+
+        TweenService:Create(SpeedStroke, TweenInfo.new(0.3), {
+
+            Color = Color3.fromRGB(0, 170, 255),
+
+            Thickness = 1
+
+        }):Play()
+
+        SpeedToggle.Text = "OFF"
+
+        
+
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+
+            player.Character.Humanoid.WalkSpeed = 16
+
+        end
+
+    end
+
+end)
+
+-- Infinite Jump Logic vá»›i hiá»‡u á»©ng
+
+JumpToggle.MouseButton1Click:Connect(function()
+
+    JumpEnabled = not JumpEnabled
+
+    
+
+    if JumpEnabled then
+
+        TweenService:Create(JumpToggle, TweenInfo.new(0.3), {
+
+            BackgroundColor3 = Color3.fromRGB(30, 100, 30),
+
+            TextColor3 = Color3.fromRGB(0, 255, 0)
+
+        }):Play()
+
+        TweenService:Create(JumpStroke, TweenInfo.new(0.3), {
+
+            Color = Color3.fromRGB(0, 255, 0),
+
+            Thickness = 2
+
+        }):Play()
+
+        JumpToggle.Text = "ON"
+
+        
+
+        -- Infinite Jump Logic
+
+        JumpConnection = UserInputService.JumpRequest:Connect(function()
+
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+
+                player.Character.Humanoid:ChangeState("Jumping")
+
+            end
+
+        end)
+
+    else
+
+        TweenService:Create(JumpToggle, TweenInfo.new(0.3), {
+
+            BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+
+            TextColor3 = Color3.fromRGB(255, 50, 50)
+
+        }):Play()
+
+        TweenService:Create(JumpStroke, TweenInfo.new(0.3), {
+
+            Color = Color3.fromRGB(0, 170, 255),
+
+            Thickness = 1
+
+        }):Play()
+
+        JumpToggle.Text = "OFF"
+
+        
+
+        if JumpConnection then
+
+            JumpConnection:Disconnect()
+
+            JumpConnection = nil
+
+        end
+
+    end
+
+end)
+
+-- ESP Logic vá»›i hiá»‡u á»©ng
+
+ESPToggle.MouseButton1Click:Connect(function()
+
+    ESPEnabled = not ESPEnabled
+
+    
+
+    if ESPEnabled then
+
+        TweenService:Create(ESPToggle, TweenInfo.new(0.3), {
+
+            BackgroundColor3 = Color3.fromRGB(30, 100, 30),
+
+            TextColor3 = Color3.fromRGB(0, 255, 0)
+
+        }):Play()
+
+        TweenService:Create(ESPStroke, TweenInfo.new(0.3), {
+
+            Color = Color3.fromRGB(0, 255, 0),
+
+            Thickness = 2
+
+        }):Play()
+
+        ESPToggle.Text = "ON"
+
+        
+
+        -- ESP Logic
+
+        local function AddESP(character)
+
+            if character:FindFirstChild("HumanoidRootPart") then
+
+                local highlight = Instance.new("Highlight")
+
+                highlight.Name = "QetarESP"
+
+                highlight.FillColor = Color3.fromRGB(255, 0, 0)
+
+                highlight.FillTransparency = 0.8
+
+                highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
+
+                highlight.OutlineTransparency = 0
+
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+
+                highlight.Parent = character
+
+                ESPHighlights[character] = highlight
+
+                
+
+                -- ThĂªm tĂªn ngÆ°á»i chÆ¡i
+
+                local playerName = Players:GetPlayerFromCharacter(character)
+
+                if playerName then
+
+                    local billboard = Instance.new("BillboardGui")
+
+                    billboard.Name = "ESPName"
+
+                    billboard.Size = UDim2.new(0, 200, 0, 50)
+
+                    billboard.StudsOffset = Vector3.new(0, 3, 0)
+
+                    billboard.AlwaysOnTop = true
+
+                    billboard.Adornee = character:WaitForChild("Head")
+
+                    
+
+                    local nameLabel = Instance.new("TextLabel")
+
+                    nameLabel.Size = UDim2.new(1, 0, 1, 0)
+
+                    nameLabel.BackgroundTransparency = 1
+
+                    nameLabel.Text = playerName.Name
+
+                    nameLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
+
+                    nameLabel.TextSize = 14
+
+                    nameLabel.Font = Enum.Font.Code
+
+                    nameLabel.Parent = billboard
+
+                    
+
+                    billboard.Parent = character
+
+                end
+
+            end
+
+        end
+
+        
+
+        -- Ăp dá»¥ng ESP cho táº¥t cáº£ ngÆ°á»i chÆ¡i hiá»‡n táº¡i
+
+        for _, otherPlayer in ipairs(Players:GetPlayers()) do
+
+            if otherPlayer ~= player and otherPlayer.Character then
+
+                AddESP(otherPlayer.Character)
+
+            end
+
+        end
+
+        
+
+        -- Theo dĂµi ngÆ°á»i chÆ¡i má»›i
+
+        Players.PlayerAdded:Connect(function(otherPlayer)
+
+            otherPlayer.CharacterAdded:Connect(function(character)
+
+                if ESPEnabled then
+
+                    AddESP(character)
+
+                end
+
+            end)
+
+        end)
+
+    else
+
+        TweenService:Create(ESPToggle, TweenInfo.new(0.3), {
+
+            BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+
+            TextColor3 = Color3.fromRGB(255, 50, 50)
+
+        }):Play()
+
+        TweenService:Create(ESPStroke, TweenInfo.new(0.3), {
+
+            Color = Color3.fromRGB(0, 170, 255),
+
+            Thickness = 1
+
+        }):Play()
+
+        ESPToggle.Text = "OFF"
+
+        
+
+        -- XĂ³a ESP
+
+        for character, highlight in pairs(ESPHighlights) do
+
+            highlight:Destroy()
+
+            local billboard = character:FindFirstChild("ESPName")
+
+            if billboard then
+
+                billboard:Destroy()
+
+            end
+
+        end
+
+        ESPHighlights = {}
+
+    end
+
+end)
+
+-- Xá»­ lĂ½ sá»± kiá»‡n khi Character cháº¿t
+
+player.CharacterAdded:Connect(function(character)
+
+    character:WaitForChild("Humanoid").Died:Connect(function()
+
+        if SpeedEnabled then
+
+            task.wait(3) -- Äá»£i respawn
+
+            if character:FindFirstChild("Humanoid") then
+
+                character.Humanoid.WalkSpeed = SpeedValue
+
+            end
+
+        end
+
+    end)
+
+end)
+
+-- DRAGGABLE GUI vá»›i hiá»‡u á»©ng
+
+local dragging
+
+local dragInput
+
+local dragStart
+
+local startPos
+
+local function update(input)
+
+    local delta = input.Position - dragStart
+
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+
+end
+
+TopBar.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = true
+
+        dragStart = input.Position
+
+        startPos = MainFrame.Position
+
+        
+
+        -- Hiá»‡u á»©ng khi kĂ©o
+
+        TweenService:Create(MainFrameGlow, TweenInfo.new(0.2), {
+
+            Thickness = 4,
+
+            Color = Color3.fromRGB(0, 255, 255)
+
+        }):Play()
+
+        
+
+        input.Changed:Connect(function()
+
+            if input.UserInputState == Enum.UserInputState.End then
+
+                dragging = false
+
+                TweenService:Create(MainFrameGlow, TweenInfo.new(0.2), {
+
+                    Thickness = 2,
+
+                    Color = Color3.fromRGB(0, 170, 255)
+
+                }):Play()
+
+            end
+
+        end)
+
+    end
+
+end)
+
+TopBar.InputChanged:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragInput = input
+
+    end
+
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+
+    if input == dragInput and dragging then
+
+        update(input)
+
+    end
+
+end)
+
+-- MINUS BUTTON (Minimize) vá»›i hiá»‡u á»©ng
+
+local isMinimized = false
+
+MinusButton.MouseButton1Click:Connect(function()
+
+    isMinimized = not isMinimized
+
+    
+
+    if isMinimized then
+
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+
+            Size = UDim2.new(0, 450, 0, 35)
+
+        }):Play()
+
+        TweenService:Create(MinusButton, TweenInfo.new(0.2), {
+
+            TextColor3 = Color3.fromRGB(0, 255, 0)
+
+        }):Play()
+
+        MinusButton.Text = "+"
+
+    else
+
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+
+            Size = UDim2.new(0, 450, 0, 400)
+
+        }):Play()
+
+        TweenService:Create(MinusButton, TweenInfo.new(0.2), {
+
+            TextColor3 = Color3.fromRGB(255, 255, 255)
+
+        }):Play()
+
+        MinusButton.Text = "-"
+
+    end
+
+end)
+
+-- CLOSE BUTTON vá»›i hiá»‡u á»©ng
+
+CloseButton.MouseButton1Click:Connect(function()
+
+    TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+
+        Size = UDim2.new(0, 0, 0, 0),
+
+        BackgroundTransparency = 1
+
+    }):Play()
+
+    TweenService:Create(MainFrameGlow, TweenInfo.new(0.3), {
+
+        Thickness = 0
+
+    }):Play()
+
+    
+
+    wait(0.3)
+
+    ScreenGui:Destroy()
+
+end)
+
+-- KEYBIND F9 Ä‘á»ƒ áº©n/hiá»‡n GUI
+
+local isGUIVisible = true
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+
+    if gameProcessed then return end
+
+    
+
+    if input.KeyCode == Enum.KeyCode.F9 then
+
+        isGUIVisible = not isGUIVisible
+
+        
+
+        if isGUIVisible then
+
+            MainFrame.Visible = true
+
+            TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+
+                Size = UDim2.new(0, 450, 0, 400),
+
+                BackgroundTransparency = 0
+
+            }):Play()
+
+        else
+
+            TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+
+                Size = UDim2.new(0, 0, 0, 0),
+
+                BackgroundTransparency = 1
+
+            }):Play()
+
+            wait(0.3)
+
+            MainFrame.Visible = false
+
+        end
+
+    end
+
+end)
+
+-- Tá»° Äá»˜NG Cáº¬P NHáº¬T WALKSPEED KHI RESPAWN
+
+player.CharacterAdded:Connect(function(char)
+
+    char:WaitForChild("Humanoid")
+
+    
+
+    if SpeedEnabled then
+
+        char.Humanoid.WalkSpeed = SpeedValue
+
+    end
+
+    
+
+    -- Ná»‘i láº¡i ESP náº¿u cáº§n
+
+    if ESPEnabled then
+
+        task.wait(1)
+
+        for _, otherPlayer in ipairs(Players:GetPlayers()) do
+
+            if otherPlayer ~= player and otherPlayer.Character and not ESPHighlights[otherPlayer.Character] then
+
+                local highlight = Instance.new("Highlight")
+
+                highlight.Name = "QetarESP"
+
+                highlight.FillColor = Color3.fromRGB(255, 0, 0)
+
+                highlight.FillTransparency = 0.8
+
+                highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
+
+                highlight.OutlineTransparency = 0
+
+                highlight.Parent = otherPlayer.Character
+
+                ESPHighlights[otherPlayer.Character] = highlight
+
+            end
+
+        end
+
+    end
+
+end)
+
+-- THĂ”NG BĂO KHI LOAD XONG
+
+print("đŸ® Qetar Hub v1.0 loaded successfully!")
+
+print("đŸ“Œ Creator: Gr0k3_script")
+
+print("đŸ¯ TikTok: @Gr0k3_script")
+
+print("đŸ”‘ Press F9 to toggle GUI")
+
+print("âœ¨ Enjoy your gaming experience!")
+
+-- Hiá»‡u á»©ng cháº¡y chá»¯ cho title
+
+spawn(function()
+
+    local originalText = "QETAR HUB"
+
+    local colors = {
+
+        Color3.fromRGB(0, 170, 255),
+
+        Color3.fromRGB(0, 255, 255),
+
+        Color3.fromRGB(0, 200, 255),
+
+        Color3.fromRGB(0, 150, 255)
+
+    }
+
+    
+
+    while true do
+
+        for i = 1, #colors do
+
+            if Title and Title.Parent then
+
+                TweenService:Create(Title, TweenInfo.new(0.5, Enum.EasingStyle.Sine), {
+
+                    TextColor3 = colors[i]
+
+                }):Play()
+
+            end
+
+            wait(0.8)
+
+        end
+
+    end
+
+end)
