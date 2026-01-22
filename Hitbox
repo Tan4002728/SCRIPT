@@ -1,0 +1,452 @@
+local Players = game:GetService('Players')
+local TweenService = game:GetService('TweenService')
+local LocalPlayer = Players.LocalPlayer
+
+-- Tạo ScreenGui chính
+local ScreenGui = Instance.new('ScreenGui')
+ScreenGui.Parent = LocalPlayer:FindFirstChildOfClass('PlayerGui')
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.IgnoreGuiInset = true
+
+-- Hàm tạo loading screen nhỏ 50x50
+local function createSmallLoadingScreen(text, duration)
+    local Frame = Instance.new('Frame')
+    Frame.Parent = ScreenGui
+    Frame.Size = UDim2.new(0, 50, 0, 50)
+    Frame.Position = UDim2.new(0.5, -25, 0.5, -25)
+    Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Frame.BorderSizePixel = 0
+    Frame.ZIndex = 10
+    Frame.BackgroundTransparency = 1
+    
+    local UICorner = Instance.new('UICorner')
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = Frame
+    
+    -- Tạo các chấm loading
+    local dots = {}
+    for i = 1, 8 do
+        local dot = Instance.new('Frame')
+        dot.Parent = Frame
+        dot.Size = UDim2.new(0, 6, 0, 6)
+        dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        dot.BorderSizePixel = 0
+        dot.BackgroundTransparency = 1
+        
+        local dotCorner = Instance.new('UICorner')
+        dotCorner.CornerRadius = UDim.new(1, 0)
+        dotCorner.Parent = dot
+        
+        local angle = (i - 1) * (360 / 8)
+        local rad = math.rad(angle)
+        local radius = 18
+        local x = 25 + math.cos(rad) * radius - 3
+        local y = 25 + math.sin(rad) * radius - 3
+        
+        dot.Position = UDim2.new(0, x, 0, y)
+        table.insert(dots, dot)
+    end
+    
+    -- Text label bên dưới
+    local TextLabel = Instance.new('TextLabel')
+    TextLabel.Parent = ScreenGui
+    TextLabel.Size = UDim2.new(0, 200, 0, 30)
+    TextLabel.Position = UDim2.new(0.5, -100, 0.5, 40)
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Text = text
+    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextLabel.Font = Enum.Font.GothamBold
+    TextLabel.TextSize = 18
+    TextLabel.TextTransparency = 1
+    
+    -- Fade in
+    local fadeInFrame = TweenService:Create(
+        Frame,
+        TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        {BackgroundTransparency = 0.1}
+    )
+    local fadeInText = TweenService:Create(
+        TextLabel,
+        TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        {TextTransparency = 0}
+    )
+    
+    fadeInFrame:Play()
+    fadeInText:Play()
+    
+    -- Animation các chấm
+    task.spawn(function()
+        while Frame.Parent do
+            for i, dot in ipairs(dots) do
+                task.spawn(function()
+                    local fadeIn = TweenService:Create(
+                        dot,
+                        TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                        {BackgroundTransparency = 0}
+                    )
+                    fadeIn:Play()
+                    task.wait(0.4)
+                    local fadeOut = TweenService:Create(
+                        dot,
+                        TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+                        {BackgroundTransparency = 1}
+                    )
+                    fadeOut:Play()
+                end)
+                task.wait(0.1)
+            end
+            task.wait(0.3)
+        end
+    end)
+    
+    -- Tự động ẩn
+    task.delay(duration - 0.3, function()
+        local fadeOutFrame = TweenService:Create(
+            Frame,
+            TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+            {BackgroundTransparency = 1}
+        )
+        local fadeOutText = TweenService:Create(
+            TextLabel,
+            TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+            {TextTransparency = 1}
+        )
+        
+        fadeOutFrame:Play()
+        fadeOutText:Play()
+        
+        fadeOutFrame.Completed:Connect(function()
+            Frame:Destroy()
+            TextLabel:Destroy()
+        end)
+    end)
+    
+    return Frame
+end
+
+-- Hàm tạo loading screen toàn màn hình
+local function createFullLoadingScreen(duration)
+    local Frame = Instance.new('Frame')
+    Frame.Parent = ScreenGui
+    Frame.Size = UDim2.new(1, 0, 1, 0)
+    Frame.Position = UDim2.new(0, 0, 0, 0)
+    Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Frame.BorderSizePixel = 0
+    Frame.ZIndex = 10
+    Frame.BackgroundTransparency = 1
+    
+    local TextLabel = Instance.new('TextLabel')
+    TextLabel.Parent = Frame
+    TextLabel.Size = UDim2.new(0, 400, 0, 50)
+    TextLabel.Position = UDim2.new(0.5, -200, 0.4, -25)
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Text = "Loading Screen"
+    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextLabel.Font = Enum.Font.GothamBold
+    TextLabel.TextSize = 32
+    TextLabel.TextTransparency = 1
+    
+    -- Progress bar background
+    local BarBackground = Instance.new('Frame')
+    BarBackground.Parent = Frame
+    BarBackground.Size = UDim2.new(0, 400, 0, 10)
+    BarBackground.Position = UDim2.new(0.5, -200, 0.5, 0)
+    BarBackground.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    BarBackground.BorderSizePixel = 0
+    BarBackground.BackgroundTransparency = 1
+    
+    local UICorner1 = Instance.new('UICorner')
+    UICorner1.CornerRadius = UDim.new(0, 5)
+    UICorner1.Parent = BarBackground
+    
+    -- Progress bar fill
+    local BarFill = Instance.new('Frame')
+    BarFill.Parent = BarBackground
+    BarFill.Size = UDim2.new(0, 0, 1, 0)
+    BarFill.Position = UDim2.new(0, 0, 0, 0)
+    BarFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    BarFill.BorderSizePixel = 0
+    
+    local UICorner2 = Instance.new('UICorner')
+    UICorner2.CornerRadius = UDim.new(0, 5)
+    UICorner2.Parent = BarFill
+    
+    -- Percentage label
+    local PercentLabel = Instance.new('TextLabel')
+    PercentLabel.Parent = Frame
+    PercentLabel.Size = UDim2.new(0, 100, 0, 30)
+    PercentLabel.Position = UDim2.new(0.5, -50, 0.5, 20)
+    PercentLabel.BackgroundTransparency = 1
+    PercentLabel.Text = "0%"
+    PercentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PercentLabel.Font = Enum.Font.Gotham
+    PercentLabel.TextSize = 18
+    PercentLabel.TextTransparency = 1
+    
+    -- Fade in
+    local fadeIn = TweenService:Create(
+        Frame,
+        TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        {BackgroundTransparency = 0}
+    )
+    local fadeInText = TweenService:Create(
+        TextLabel,
+        TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        {TextTransparency = 0}
+    )
+    local fadeInBar = TweenService:Create(
+        BarBackground,
+        TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        {BackgroundTransparency = 0}
+    )
+    local fadeInPercent = TweenService:Create(
+        PercentLabel,
+        TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        {TextTransparency = 0}
+    )
+    
+    fadeIn:Play()
+    fadeInText:Play()
+    fadeInBar:Play()
+    fadeInPercent:Play()
+    
+    -- Animate progress bar
+    task.spawn(function()
+        local startTime = tick()
+        while tick() - startTime < duration - 0.3 do
+            local progress = (tick() - startTime) / (duration - 0.3)
+            local width = math.clamp(progress, 0, 1)
+            BarFill.Size = UDim2.new(width, 0, 1, 0)
+            PercentLabel.Text = math.floor(width * 100) .. "%"
+            task.wait()
+        end
+        BarFill.Size = UDim2.new(1, 0, 1, 0)
+        PercentLabel.Text = "100%"
+    end)
+    
+    -- Tự động ẩn
+    task.delay(duration - 0.3, function()
+        local fadeOut = TweenService:Create(
+            Frame,
+            TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+            {BackgroundTransparency = 1}
+        )
+        local fadeOutText = TweenService:Create(
+            TextLabel,
+            TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+            {TextTransparency = 1}
+        )
+        local fadeOutBar = TweenService:Create(
+            BarBackground,
+            TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+            {BackgroundTransparency = 1}
+        )
+        local fadeOutPercent = TweenService:Create(
+            PercentLabel,
+            TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+            {TextTransparency = 1}
+        )
+        
+        fadeOut:Play()
+        fadeOutText:Play()
+        fadeOutBar:Play()
+        fadeOutPercent:Play()
+        
+        fadeOut.Completed:Connect(function()
+            Frame:Destroy()
+        end)
+    end)
+    
+    return Frame
+end
+
+-- Chạy sequence loading screens
+local function runLoadingSequence()
+    -- 1. Loading Game - GUI nhỏ 50x50 (2s)
+    createSmallLoadingScreen("Loading Game", 2)
+    
+    task.wait(2)
+    
+    -- 2. Loading Screen - Toàn màn hình đen (4s)
+    createFullLoadingScreen(4)
+    
+    task.wait(4)
+    
+    -- 3. Loading Script - GUI nhỏ 50x50 (2s)
+    createSmallLoadingScreen("Loading Script", 2)
+    
+    task.wait(2)
+    
+    -- 4. Wait - GUI nhỏ 50x50 (2s)
+    createSmallLoadingScreen("Wait", 2)
+    
+    task.wait(2)
+    
+    -- 5. Thank for Use 🇻🇳 - GUI nhỏ 50x50 (2s)
+    createSmallLoadingScreen("Thank for Use 🇻🇳", 2)
+    
+    task.wait(2)
+    
+    -- 6. Đợi 1s sau đó chạy script chính
+    task.wait(1)
+    
+    -- Script chính của bạn
+    local _Players = game:GetService('Players')
+    local _RunService = game:GetService('RunService')
+    local _UserInputService = game:GetService('UserInputService')
+    local _LocalPlayer = _Players.LocalPlayer
+    local _ScreenGui = Instance.new('ScreenGui')
+
+    _ScreenGui.Parent = _LocalPlayer:FindFirstChild('PlayerGui') or Instance.new('PlayerGui', _LocalPlayer)
+
+    local _TextButton = Instance.new('TextButton')
+
+    _TextButton.Parent = _ScreenGui
+    _TextButton.Position = UDim2.new(0, 10, 0.5, -25)
+    _TextButton.Size = UDim2.new(0, 150, 0, 50)
+    _TextButton.Text = 'Hitbox: Off'
+    _TextButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    _TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    _TextButton.Font = Enum.Font.GothamBold
+    _TextButton.TextSize = 22
+
+    local _UICorner = Instance.new('UICorner')
+
+    _UICorner.CornerRadius = UDim.new(0, 10)
+    _UICorner.Parent = _TextButton
+
+    local _Frame = Instance.new('Frame')
+
+    _Frame.Parent = _ScreenGui
+    _Frame.Position = UDim2.new(0, 10, 0.5, 35)
+    _Frame.Size = UDim2.new(0, 200, 0, 50)
+    _Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    _Frame.Visible = false
+
+    local _UICorner2 = Instance.new('UICorner')
+
+    _UICorner2.CornerRadius = UDim.new(0, 10)
+    _UICorner2.Parent = _Frame
+
+    local _Frame2 = Instance.new('Frame')
+
+    _Frame2.Parent = _Frame
+    _Frame2.Position = UDim2.new(0, 10, 0.5, -5)
+    _Frame2.Size = UDim2.new(1, -20, 0, 10)
+    _Frame2.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+
+    local _UICorner3 = Instance.new('UICorner')
+
+    _UICorner3.CornerRadius = UDim.new(0, 5)
+    _UICorner3.Parent = _Frame2
+
+    local _Frame3 = Instance.new('Frame')
+
+    _Frame3.Parent = _Frame2
+    _Frame3.Size = UDim2.new(0, 30, 0, 30)
+    _Frame3.Position = UDim2.new(0, 0, -1, 0)
+    _Frame3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+
+    local _UICorner4 = Instance.new('UICorner')
+
+    _UICorner4.CornerRadius = UDim.new(1, 0)
+    _UICorner4.Parent = _Frame3
+
+    local _TextLabel = Instance.new('TextLabel')
+
+    _TextLabel.Parent = _Frame
+    _TextLabel.Position = UDim2.new(0.5, -40, 0, -25)
+    _TextLabel.Size = UDim2.new(0, 80, 0, 20)
+    _TextLabel.BackgroundTransparency = 1
+    _TextLabel.Text = 'Size: 10'
+    _TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    _TextLabel.Font = Enum.Font.GothamBold
+    _TextLabel.TextSize = 18
+
+    local u15 = false
+    local u16 = 10
+    local u17 = nil
+    local u18 = false
+
+    local function u22()
+        local v19 = workspace:FindFirstChild(_LocalPlayer.Name)
+        local v20 = v19 and v19:FindFirstChild('Hitbox')
+
+        if v20 then
+            v20.Transparency = 0.8
+            v20.Size = Vector3.new(u16, u16, u16)
+            v20.BrickColor = BrickColor.Red()
+        end
+
+        local _Football = workspace:FindFirstChild('Football')
+
+        if _Football then
+            _Football = workspace.Football:FindFirstChild('Hitbox')
+        end
+        if _Football then
+            _Football.Transparency = 0.7
+            _Football.Size = Vector3.new(u16, u16, u16)
+            _Football.BrickColor = BrickColor.Red()
+        end
+    end
+
+    _TextButton.MouseButton1Click:Connect(function()
+        u15 = not u15
+        _TextButton.Text = 'Hitbox: ' .. (u15 and 'On' or 'Off')
+        _TextButton.BackgroundColor3 = u15 and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
+        _Frame.Visible = u15
+
+        if u15 then
+            if not u17 then
+                u17 = _RunService.RenderStepped:Connect(u22)
+            end
+        else
+            u16 = 10
+            _TextLabel.Text = 'Size: 10'
+            _Frame3.Position = UDim2.new(0, 0, -1, 0)
+
+            if u17 then
+                u17:Disconnect()
+
+                u17 = nil
+            end
+
+            u22()
+        end
+    end)
+
+    local function u28(p23)
+        local _X = p23.Position.X
+        local _X2 = _Frame2.AbsolutePosition.X
+        local _X3 = _Frame2.AbsoluteSize.X
+        local v27 = math.clamp((_X - _X2) / _X3, 0, 1)
+
+        _Frame3.Position = UDim2.new(v27, -15, -1, 0)
+        u16 = math.floor(10 + v27 * 10)
+        _TextLabel.Text = 'Size: ' .. u16
+
+        if u15 then
+            u22()
+        end
+    end
+
+    _Frame3.InputBegan:Connect(function(p29)
+        if p29.UserInputType == Enum.UserInputType.MouseButton1 or p29.UserInputType == Enum.UserInputType.Touch then
+            u18 = true
+        end
+    end)
+    _Frame3.InputEnded:Connect(function(p30)
+        if p30.UserInputType == Enum.UserInputType.MouseButton1 or p30.UserInputType == Enum.UserInputType.Touch then
+            u18 = false
+        end
+    end)
+    _UserInputService.InputChanged:Connect(function(p31)
+        if u18 and (p31.UserInputType == Enum.UserInputType.MouseMovement or p31.UserInputType == Enum.UserInputType.Touch) then
+            u28(p31)
+        end
+    end)
+end
+
+-- Bắt đầu chạy loading sequence
+runLoadingSequence()
