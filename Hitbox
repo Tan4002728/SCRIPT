@@ -282,7 +282,7 @@ local function runLoadingSequence()
     task.wait(2)
     
     -- 4. Thank for Use 🇻🇳 - Không có spinner (2s)
-    createThankYouScreen("Thank for Use 🇻🇳", 2)
+    createThankYouScreen("Thank for Using 🇻🇳", 2)
     
     task.wait(2)
     
