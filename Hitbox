@@ -23,7 +23,7 @@ do
 	text.Position = UDim2.new(0.5, 0, 0.5, 0)
 	text.Size = UDim2.new(0, 400, 0, 120)
 	text.BackgroundTransparency = 1
-	text.Text = "V1.0.0"
+	text.Text = "V2.2.0"
 	text.Font = Enum.Font.GothamBold
 	text.TextColor3 = Color3.fromRGB(255, 255, 255)
 	text.TextTransparency = 1
