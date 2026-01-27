@@ -290,5 +290,6 @@ local function runLoadingSequence()
     task.wait(1)
     
     loadstring(game:HttpGet('https://raw.githubusercontent.com/RedJDarks/Mani/refs/heads/main/Ywyir'))()
+end
 
 runLoadingSequence()
