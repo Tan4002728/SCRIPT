@@ -1,11 +1,1 @@
-Scriptupdate = true
 
-local function Load(url)
-    return loadstring(game:HttpGet(url, true))()
-end
-
-if Scriptupdate == true then
-    Load("https://pastefy.app/ASQGLM4C/raw")
-else
-    Load("https://raw.githubusercontent.com/Tan4002728/Oho/refs/heads/main/Eyehe")
-end
