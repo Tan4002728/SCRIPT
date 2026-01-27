@@ -1,1 +1,80 @@
+-- Simple GUI - Gr0k3_Script
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
 
+local player = Players.LocalPlayer
+
+-- ScreenGui
+local gui = Instance.new("ScreenGui")
+gui.Name = "Gr0k3_SimpleGUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Main Frame
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 260, 0, 100)
+main.Position = UDim2.new(0.5, -130, 0.3, 0)
+main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+main.BorderSizePixel = 0
+main.Parent = gui
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -40, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Sử dụng Script mới\nTikTok : Gr0k3_Script"
+title.TextColor3 = Color3.fromRGB(0, 255, 0)
+title.TextWrapped = true
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = main
+
+-- Close Button (X)
+local close = Instance.new("TextButton")
+close.Size = UDim2.new(0, 30, 0, 30)
+close.Position = UDim2.new(1, -35, 0, 5)
+close.Text = "X"
+close.Font = Enum.Font.GothamBold
+close.TextScaled = true
+close.TextColor3 = Color3.fromRGB(255, 80, 80)
+close.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+close.BorderSizePixel = 0
+close.Parent = main
+
+close.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
+
+-- Drag GUI
+local dragging = false
+local dragStart, startPos
+
+main.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = main.Position
+	end
+end)
+
+main.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+	or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - dragStart
+		main.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
