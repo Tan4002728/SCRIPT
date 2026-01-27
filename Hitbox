@@ -1,8 +1,4 @@
--- ===== WAIT GAME LOAD + VERSION INTRO =====
-do
-	-- Đợi game load xong
-	Wait(2)
-
+wait(1)
 	local Players = game:GetService("Players")
 	local TweenService = game:GetService("TweenService")
 
@@ -20,7 +16,7 @@ do
 	local text = Instance.new("TextLabel")
 	text.Parent = gui
 	text.AnchorPoint = Vector2.new(0.5, 0.5)
-	text.Position = UDim2.new(0.5, 0, 0.5, 0) -- giữa màn hình
+	text.Position = UDim2.new(0.5, 0, 0.5, 0)
 	text.Size = UDim2.new(0, 400, 0, 120)
 	text.BackgroundTransparency = 1
 	text.Text = "V1.0.0"
@@ -30,7 +26,7 @@ do
 	text.TextStrokeTransparency = 0.75
 	text.TextXAlignment = Enum.TextXAlignment.Center
 	text.TextYAlignment = Enum.TextYAlignment.Center
-	text.TextSize = 16 -- bắt đầu nhỏ
+	text.TextSize = 16
 
 	-- Tween phóng to + hiện
 	local grow = TweenService:Create(
@@ -74,134 +70,13 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.IgnoreGuiInset = true
 
--- Hàm tạo loading screen nhỏ với GUI frame
-local function createSmallLoadingScreen(text, duration)
-    -- Frame nền cho loading nhỏ
-    local Container = Instance.new('Frame')
-    Container.Parent = ScreenGui
-    Container.Size = UDim2.new(0, 120, 0, 120)
-    Container.Position = UDim2.new(0.5, -60, 0.5, -60)
-    Container.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Container.BorderSizePixel = 0
-    Container.ZIndex = 10
-    Container.BackgroundTransparency = 1
-    
-    local ContainerCorner = Instance.new('UICorner')
-    ContainerCorner.CornerRadius = UDim.new(0, 15)
-    ContainerCorner.Parent = Container
-    
-    -- Tạo các chấm loading (không có frame trắng bao quanh)
-    local dots = {}
-    for i = 1, 8 do
-        local dot = Instance.new('Frame')
-        dot.Parent = Container
-        dot.Size = UDim2.new(0, 6, 0, 6)
-        dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        dot.BorderSizePixel = 0
-        dot.BackgroundTransparency = 1
-        dot.ZIndex = 12
-        
-        local dotCorner = Instance.new('UICorner')
-        dotCorner.CornerRadius = UDim.new(1, 0)
-        dotCorner.Parent = dot
-        
-        local angle = (i - 1) * (360 / 8)
-        local rad = math.rad(angle)
-        local radius = 18
-        local centerX = 60
-        local centerY = 35
-        local x = centerX + math.cos(rad) * radius - 3
-        local y = centerY + math.sin(rad) * radius - 3
-        
-        dot.Position = UDim2.new(0, x, 0, y)
-        table.insert(dots, dot)
-    end
-    
-    -- Text label bên trong container
-    local TextLabel = Instance.new('TextLabel')
-    TextLabel.Parent = Container
-    TextLabel.Size = UDim2.new(1, -10, 0, 40)
-    TextLabel.Position = UDim2.new(0, 5, 1, -45)
-    TextLabel.BackgroundTransparency = 1
-    TextLabel.Text = text
-    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TextLabel.Font = Enum.Font.GothamBold
-    TextLabel.TextSize = 14
-    TextLabel.TextTransparency = 1
-    TextLabel.ZIndex = 11
-    TextLabel.TextWrapped = true
-    
-    -- Fade in
-    local fadeInContainer = TweenService:Create(
-        Container,
-        TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-        {BackgroundTransparency = 0.1}
-    )
-    local fadeInText = TweenService:Create(
-        TextLabel,
-        TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-        {TextTransparency = 0}
-    )
-    
-    fadeInContainer:Play()
-    fadeInText:Play()
-    
-    -- Animation các chấm
-    task.spawn(function()
-        while Container.Parent do
-            for i, dot in ipairs(dots) do
-                task.spawn(function()
-                    local fadeIn = TweenService:Create(
-                        dot,
-                        TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-                        {BackgroundTransparency = 0}
-                    )
-                    fadeIn:Play()
-                    task.wait(0.4)
-                    local fadeOut = TweenService:Create(
-                        dot,
-                        TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
-                        {BackgroundTransparency = 1}
-                    )
-                    fadeOut:Play()
-                end)
-                task.wait(0.1)
-            end
-            task.wait(0.3)
-        end
-    end)
-    
-    -- Tự động ẩn
-    task.delay(duration - 0.3, function()
-        local fadeOutContainer = TweenService:Create(
-            Container,
-            TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
-            {BackgroundTransparency = 1}
-        )
-        local fadeOutText = TweenService:Create(
-            TextLabel,
-            TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
-            {TextTransparency = 1}
-        )
-        
-        fadeOutContainer:Play()
-        fadeOutText:Play()
-        
-        fadeOutContainer.Completed:Connect(function()
-            Container:Destroy()
-        end)
-    end)
-    
-    return Container
-end
-
--- Hàm tạo "Thank for Use" đơn giản không có spinner
-local function createThankYouScreen(text, duration)
+-- Hàm tạo màn hình bypass key
+local function createBypassScreen(text, duration)
     -- Frame nền
     local Container = Instance.new('Frame')
     Container.Parent = ScreenGui
-    Container.Size = UDim2.new(0, 200, 0, 80)
-    Container.Position = UDim2.new(0.5, -100, 0.5, -40)
+    Container.Size = UDim2.new(0, 250, 0, 100)
+    Container.Position = UDim2.new(0.5, -125, 0.5, -50)
     Container.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     Container.BorderSizePixel = 0
     Container.ZIndex = 10
@@ -220,7 +95,7 @@ local function createThankYouScreen(text, duration)
     TextLabel.Text = text
     TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TextLabel.Font = Enum.Font.GothamBold
-    TextLabel.TextSize = 18
+    TextLabel.TextSize = 20
     TextLabel.TextTransparency = 1
     TextLabel.ZIndex = 11
     TextLabel.TextWrapped = true
@@ -264,32 +139,10 @@ local function createThankYouScreen(text, duration)
     return Container
 end
 
--- Chạy sequence loading screens
-local function runLoadingSequence()
-    -- 1. Loading Game - GUI nhỏ (2s)
-    createSmallLoadingScreen("Loading Game", 2)
-    
-    task.wait(1)
-    
-    -- 2. Loading Script - GUI nhỏ (2s)
-    createSmallLoadingScreen("Loading Script", 2)
-    
-    task.wait(1)
-    
-    -- 3. Wait - GUI nhỏ (2s)
-    createSmallLoadingScreen("Wait", 2)
-    
-    task.wait(1)
-    
-    -- 4. Thank for Use 🇻🇳 - Không có spinner (2s)
-    createThankYouScreen("Thank for Using 🇻🇳", 2)
-    
-    task.wait(1)
-    
-    -- 5. Đợi 1s sau đó chạy script chính
-    task.wait(0.1)
-    
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/RedJDarks/Mani/refs/heads/main/Ywyir'))()
-end
+-- Hiển thị màn hình bypass key
+createBypassScreen("Bypass Key By Gr0k3_script", 3)
 
-runLoadingSequence()
+task.wait(3)
+
+-- Chạy script chính
+loadstring(game:HttpGet('https://raw.githubusercontent.com/RedJDarks/Mani/refs/heads/main/Ywyir'))()
