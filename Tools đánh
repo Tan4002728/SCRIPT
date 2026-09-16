@@ -1,40 +1,73 @@
-local player = game.Players.LocalPlayer
-local runService = game:GetService("RunService")
-local httpService = game:GetService("HttpService")
-local pathfindingService = game:GetService("PathfindingService")
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "ToolsGUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player.PlayerGui
-
-local CONFIG_FILE = "AutoTeleConfig.json"
-local FLOAT_FILE = "AutoTeleFloat.json"
-
-local config = { Height = 10, Distance = 3, Speed = 100, FlyLocked = false, SpeedLocked = false, KillMode = false }
-local floatPos = {
-    FlyX = 0.02, FlyY = 0.4,
-    SpdX = 0.02, SpdY = 0.5,
-    FlyVisible = true, SpdVisible = true
-}
-
-pcall(function()
-    if isfile and isfile(CONFIG_FILE) then
-        local decoded = httpService:JSONDecode(readfile(CONFIG_FILE))
-        if decoded.Height then config.Height = decoded.Height end
-        if decoded.Distance then config.Distance = decoded.Distance end
-        if decoded.Speed then config.Speed = decoded.Speed end
-        if decoded.FlyLocked ~= nil then config.FlyLocked = decoded.FlyLocked end
-        if decoded.SpeedLocked ~= nil then config.SpeedLocked = decoded.SpeedLocked end
-        if decoded.KillMode ~= nil then config.KillMode = decoded.KillMode end
-    end
-    if isfile and isfile(FLOAT_FILE) then
-        local decoded = httpService:JSONDecode(readfile(FLOAT_FILE))
-        if decoded.FlyX then floatPos.FlyX = decoded.FlyX end
-        if decoded.FlyY then floatPos.FlyY = decoded.FlyY end
-        if decoded.SpdX then floatPos.SpdX = decoded.SpdX end
-        if decoded.SpdY then floatPos.SpdY = decoded.SpdY end
-        if decoded.FlyVisible ~= nil then floatPos.FlyVisible = decoded.FlyVisible end
-        if decoded.SpdVisible ~= nil then floatPos.SpdVisible = decoded.SpdVisible end
+local p=game.Players.LocalPlayer local r=game:GetService("RunService") local h=game:GetService("HttpService") local pf=game:GetService("PathfindingService") local sg=Instance.new("ScreenGui") sg.Name="ToolsGUI" sg.ResetOnSpawn=false sg.Parent=p.PlayerGui local CF="AutoTeleConfig.json" local FF="AutoTeleFloat.json" local c={Height=10,Distance=3,Speed=100,FlyLocked=false,SpeedLocked=false,KillMode=false} local fp={FlyX=0.02,FlyY=0.4,SpdX=0.02,SpdY=0.5,FlyVisible=true,SpdVisible=true} pcall(function() if isfile and isfile(CF) then local d=h:JSONDecode(readfile(CF)) if d.Height then c.Height=d.Height end if d.Distance then c.Distance=d.Distance end if d.Speed then c.Speed=d.Speed end if d.FlyLocked~=nil then c.FlyLocked=d.FlyLocked end if d.SpeedLocked~=nil then c.SpeedLocked=d.SpeedLocked end if d.KillMode~=nil then c.KillMode=d.KillMode end end if isfile and isfile(FF) then local d=h:JSONDecode(readfile(FF)) if d.FlyX then fp.FlyX=d.FlyX end if d.FlyY then fp.FlyY=d.FlyY end if d.SpdX then fp.SpdX=d.SpdX end if d.SpdY then fp.SpdY=d.SpdY end if d.FlyVisible~=nil then fp.FlyVisible=d.FlyVisible end if d.SpdVisible~=nil then fp.SpdVisible=d.SpdVisible end end end)
+local function sF() pcall(function() writefile(FF,h:JSONEncode(fp)) end) end
+local function sC() pcall(function() writefile(CF,h:JSONEncode(c)) end) end
+local fb=Instance.new("TextButton") fb.Size=UDim2.new(0,60,0,30) fb.Position=UDim2.new(fp.FlyX,0,fp.FlyY,0) fb.BackgroundColor3=Color3.fromRGB(50,50,50) fb.BorderSizePixel=1 fb.BorderColor3=Color3.fromRGB(255,255,255) fb.Text="FLY: OFF" fb.TextColor3=Color3.fromRGB(255,255,255) fb.TextScaled=true fb.Visible=fp.FlyVisible fb.Parent=sg
+local sb=Instance.new("TextButton") sb.Size=UDim2.new(0,60,0,30) sb.Position=UDim2.new(fp.SpdX,0,fp.SpdY,0) sb.BackgroundColor3=Color3.fromRGB(50,50,50) sb.BorderSizePixel=1 sb.BorderColor3=Color3.fromRGB(255,255,255) sb.Text="SPD: OFF" sb.TextColor3=Color3.fromRGB(255,255,255) sb.TextScaled=true sb.Visible=fp.SpdVisible sb.Parent=sg
+local fr=Instance.new("Frame") fr.Size=UDim2.new(0,160,0,240) fr.Position=UDim2.new(0.5,-80,0.5,-120) fr.BackgroundColor3=Color3.fromRGB(30,30,30) fr.BorderSizePixel=1 fr.BorderColor3=Color3.fromRGB(255,255,255) fr.Active=true fr.Draggable=true fr.Parent=sg
+local hd=Instance.new("Frame") hd.Size=UDim2.new(1,0,0,20) hd.BackgroundColor3=Color3.fromRGB(45,45,45) hd.BorderSizePixel=0 hd.Parent=fr
+local tl=Instance.new("TextLabel") tl.Size=UDim2.new(0,60,0,20) tl.Position=UDim2.new(0,5,0,0) tl.BackgroundTransparency=1 tl.Text="Tools" tl.TextColor3=Color3.fromRGB(255,255,255) tl.TextScaled=true tl.TextXAlignment=Enum.TextXAlignment.Left tl.Parent=hd
+local sv=Instance.new("TextButton") sv.Size=UDim2.new(0,16,0,16) sv.Position=UDim2.new(1,-76,0,2) sv.BackgroundColor3=Color3.fromRGB(80,80,80) sv.Text="S" sv.TextColor3=Color3.fromRGB(255,255,255) sv.TextScaled=true sv.Parent=hd
+local mb=Instance.new("TextButton") mb.Size=UDim2.new(0,26,0,16) mb.Position=UDim2.new(1,-58,0,2) mb.BackgroundColor3=Color3.fromRGB(80,80,80) mb.Text="-" mb.TextColor3=Color3.fromRGB(255,255,255) mb.TextScaled=true mb.Parent=hd
+local cb=Instance.new("TextButton") cb.Size=UDim2.new(0,16,0,16) cb.Position=UDim2.new(1,-20,0,2) cb.BackgroundColor3=Color3.fromRGB(200,50,50) cb.Text="X" cb.TextColor3=Color3.fromRGB(255,255,255) cb.TextScaled=true cb.Parent=hd
+local sc=Instance.new("ScrollingFrame") sc.Size=UDim2.new(1,0,1,-20) sc.Position=UDim2.new(0,0,0,20) sc.BackgroundTransparency=1 sc.BorderSizePixel=0 sc.ScrollBarThickness=4 sc.ScrollBarImageColor3=Color3.fromRGB(100,100,100) sc.CanvasSize=UDim2.new(0,0,0,250) sc.Parent=fr
+local s1=Instance.new("Frame") s1.Size=UDim2.new(1,-6,0,142) s1.Position=UDim2.new(0,3,0,3) s1.BackgroundColor3=Color3.fromRGB(40,40,45) s1.BorderSizePixel=1 s1.BorderColor3=Color3.fromRGB(80,80,120) s1.Parent=sc
+local s1t=Instance.new("TextLabel") s1t.Size=UDim2.new(1,0,0,14) s1t.BackgroundColor3=Color3.fromRGB(50,50,80) s1t.BorderSizePixel=0 s1t.Text="FLY" s1t.TextColor3=Color3.fromRGB(150,200,255) s1t.TextScaled=true s1t.Parent=s1
+local function mL(t,y,pr) local l=Instance.new("TextLabel") l.Size=UDim2.new(0,55,0,12) l.Position=UDim2.new(0,5,0,y) l.BackgroundTransparency=1 l.Text=t l.TextColor3=Color3.fromRGB(255,255,255) l.TextScaled=true l.TextXAlignment=Enum.TextXAlignment.Left l.Parent=pr return l end
+local function mB(t,y,pr) local b=Instance.new("TextBox") b.Size=UDim2.new(0,55,0,12) b.Position=UDim2.new(0,62,0,y) b.BackgroundColor3=Color3.fromRGB(50,50,50) b.TextColor3=Color3.fromRGB(255,255,255) b.Text=t b.TextScaled=true b.Parent=pr return b end
+mL("H:",18,s1) local hB=mB(tostring(c.Height),18,s1)
+local hSL=Instance.new("TextLabel") hSL.Size=UDim2.new(0,20,0,12) hSL.Position=UDim2.new(0,122,0,18) hSL.BackgroundTransparency=1 hSL.Text="S:" hSL.TextColor3=Color3.fromRGB(255,255,255) hSL.TextScaled=true hSL.TextXAlignment=Enum.TextXAlignment.Left hSL.Parent=s1
+local spB=Instance.new("TextBox") spB.Size=UDim2.new(0,30,0,12) spB.Position=UDim2.new(1,-32,0,18) spB.BackgroundColor3=Color3.fromRGB(50,50,50) spB.TextColor3=Color3.fromRGB(255,255,255) spB.Text=tostring(c.Speed) spB.TextScaled=true spB.Parent=s1
+mL("Dist:",34,s1) local dB=mB(tostring(c.Distance),34,s1)
+local kt=Instance.new("TextButton") kt.Size=UDim2.new(0,85,0,14) kt.Position=UDim2.new(1,-90,0,34) kt.BackgroundColor3=Color3.fromRGB(60,60,60) kt.Text="KILL: OFF" kt.TextColor3=Color3.fromRGB(255,255,255) kt.TextScaled=true kt.Parent=s1
+local st=Instance.new("TextLabel") st.Size=UDim2.new(0,145,0,12) st.Position=UDim2.new(0,5,0,52) st.BackgroundTransparency=1 st.Text="Status: IDLE" st.TextColor3=Color3.fromRGB(200,200,200) st.TextScaled=true st.TextXAlignment=Enum.TextXAlignment.Left st.Parent=s1
+local ph=Instance.new("TextLabel") ph.Size=UDim2.new(0,145,0,12) ph.Position=UDim2.new(0,5,0,66) ph.BackgroundTransparency=1 ph.Text="Phase: -" ph.TextColor3=Color3.fromRGB(255,200,100) ph.TextScaled=true ph.TextXAlignment=Enum.TextXAlignment.Left ph.Parent=s1
+local fl=Instance.new("TextButton") fl.Size=UDim2.new(0,70,0,14) fl.Position=UDim2.new(0,5,0,82) fl.BackgroundColor3=Color3.fromRGB(60,60,60) fl.Text="Lock: OFF" fl.TextColor3=Color3.fromRGB(255,255,255) fl.TextScaled=true fl.Parent=s1
+local tb=Instance.new("TextButton") tb.Size=UDim2.new(0,70,0,14) tb.Position=UDim2.new(1,-75,0,82) tb.BackgroundColor3=Color3.fromRGB(50,50,50) tb.Text="FLY OFF" tb.TextColor3=Color3.fromRGB(255,255,255) tb.TextScaled=true tb.Parent=s1
+local frb=Instance.new("TextButton") frb.Size=UDim2.new(1,-10,0,14) frb.Position=UDim2.new(0,5,0,100) frb.BackgroundColor3=Color3.fromRGB(60,60,60) frb.Text="HIDE FLOAT" frb.TextColor3=Color3.fromRGB(255,255,255) frb.TextScaled=true frb.Parent=s1
+local fil=Instance.new("TextLabel") fil.Size=UDim2.new(1,-10,0,12) fil.Position=UDim2.new(0,5,0,118) fil.BackgroundTransparency=1 fil.Text="Float: visible" fil.TextColor3=Color3.fromRGB(150,255,150) fil.TextScaled=true fil.TextXAlignment=Enum.TextXAlignment.Left fil.Parent=s1
+local s2=Instance.new("Frame") s2.Size=UDim2.new(1,-6,0,96) s2.Position=UDim2.new(0,3,0,149) s2.BackgroundColor3=Color3.fromRGB(45,40,40) s2.BorderSizePixel=1 s2.BorderColor3=Color3.fromRGB(120,80,80) s2.Parent=sc
+local s2t=Instance.new("TextLabel") s2t.Size=UDim2.new(1,0,0,14) s2t.BackgroundColor3=Color3.fromRGB(80,50,50) s2t.BorderSizePixel=0 s2t.Text="SPEED" s2t.TextColor3=Color3.fromRGB(255,150,150) s2t.TextScaled=true s2t.Parent=s2
+mL("Spd:",18,s2) local spd=mB("100",18,s2)
+local sst=Instance.new("TextLabel") sst.Size=UDim2.new(1,-10,0,12) sst.Position=UDim2.new(0,5,0,34) sst.BackgroundTransparency=1 sst.Text="Status: IDLE" sst.TextColor3=Color3.fromRGB(200,200,200) sst.TextScaled=true sst.TextXAlignment=Enum.TextXAlignment.Left sst.Parent=s2
+local sl=Instance.new("TextButton") sl.Size=UDim2.new(0,70,0,14) sl.Position=UDim2.new(0,5,0,50) sl.BackgroundColor3=Color3.fromRGB(60,60,60) sl.Text="Lock: OFF" sl.TextColor3=Color3.fromRGB(255,255,255) sl.TextScaled=true sl.Parent=s2
+local stg=Instance.new("TextButton") stg.Size=UDim2.new(0,70,0,14) stg.Position=UDim2.new(1,-75,0,50) stg.BackgroundColor3=Color3.fromRGB(50,50,50) stg.Text="SPD OFF" stg.TextColor3=Color3.fromRGB(255,255,255) stg.TextScaled=true stg.Parent=s2
+local srb=Instance.new("TextButton") srb.Size=UDim2.new(1,-10,0,14) srb.Position=UDim2.new(0,5,0,68) srb.BackgroundColor3=Color3.fromRGB(60,60,60) srb.Text="HIDE FLOAT" srb.TextColor3=Color3.fromRGB(255,255,255) srb.TextScaled=true srb.Parent=s2
+local iA=false local hbC=nil local cT=nil local lT=nil local pz="idle" local cW={} local wi=1 local lPT=0 local lTP=Vector3.zero local scc=0 local srt=nil
+local function gC() local ch=p.Character if not ch then return nil end local hr=ch:FindFirstChild("HumanoidRootPart") if not hr then return nil end local hu=ch:FindFirstChild("Humanoid") if not hu or hu.Health<=0 then return nil end return ch,hr,hu end
+local function fN() local ch,mh=gC() if not ch or not mh then return nil end local mp=mh.Position local ne=nil local nd=math.huge for _,pl in pairs(game.Players:GetPlayers()) do if pl~=p and pl.Character then local hu=pl.Character:FindFirstChild("Humanoid") if hu and hu.Health>0 then local th=pl.Character:FindFirstChild("HumanoidRootPart") if th then local di=(th.Position-mp).Magnitude if di<nd then nd=di ne=pl end end end end end return ne end
+local rp=RaycastParams.new() rp.FilterType=Enum.RaycastFilterType.Exclude rp.IgnoreWater=true
+local function cS(f,t) rp.FilterDescendantsInstances={p.Character} local re=workspace:Raycast(f,t-f,rp) return re==nil end
+local function fP(s,e) if (s-e).Magnitude<30 or cS(s,e) then return {e} end local pa=pf:CreatePath({AgentRadius=3,AgentHeight=6,AgentCanJump=true,AgentCanClimb=true,WaypointSpacing=8,Costs={Water=20}}) local ok=pcall(function() pa:ComputeAsync(s,e) end) if not ok or pa.Status~=Enum.PathStatus.Success then return {e} end local wp=pa:GetWaypoints() local re={} for _,w in ipairs(wp) do table.insert(re,w.Position) end if #re==0 then return {e} end return re end
+local function gA(hr) local at=hr:FindFirstChild("FlyRootAttachment") if not at then at=Instance.new("Attachment") at.Name="FlyRootAttachment" at.Parent=hr end return at end
+local function gAP(hr,sp) local ap=hr:FindFirstChild("FlyAlignPos") if not ap then ap=Instance.new("AlignPosition") ap.Name="FlyAlignPos" ap.Attachment0=gA(hr) ap.Mode=Enum.PositionAlignmentMode.OneAttachment ap.MaxForce=500000 ap.MaxVelocity=sp ap.Responsiveness=60 ap.ApplyAtCenterOfMass=true ap.Parent=hr end ap.MaxVelocity=sp return ap end
+local function gAO(hr) local ao=hr:FindFirstChild("FlyAlignOri") if not ao then ao=Instance.new("AlignOrientation") ao.Name="FlyAlignOri" ao.Attachment0=gA(hr) ao.Mode=Enum.OrientationAlignmentMode.OneAttachment ao.MaxTorque=500000 ao.Responsiveness=60 ao.Parent=hr end return ao end
+local function sFP() local ch,hr=gC() if not hr then return end local a1=hr:FindFirstChild("FlyAlignPos") local a2=hr:FindFirstChild("FlyAlignOri") local a3=hr:FindFirstChild("FlyRootAttachment") if a1 then a1:Destroy() end if a2 then a2:Destroy() end if a3 then a3:Destroy() end end
+local function fT(tp,fp2,sp) local ch,hr=gC() if not ch or not hr then return end local cp=hr.Position local di=tp-cp local ds=di.Magnitude if ds<0.5 then sFP() hr.AssemblyLinearVelocity=Vector3.zero return end local ho=tonumber(hB.Text) or 10 if ho<0 then ho=0 end if ho>50 then ho=50 end local ty=tp.Y+ho local ft=Vector3.new(tp.X,ty,tp.Z) local ap=gAP(hr,sp) ap.Position=ft local ao=gAO(hr) local ld=Vector3.new(fp2.X-cp.X,0,fp2.Z-cp.Z) if ld.Magnitude>0.1 then ao.CFrame=CFrame.lookAt(Vector3.zero,ld.Unit) end end
+local function tA(tc) if not tc then return end local mc=p.Character if not mc then return end local to=mc:FindFirstChildOfClass("Tool") if to then to:Activate() end pcall(function() local re=game:GetService("ReplicatedStorage"):FindFirstChild("Remotes") if re then local at=re:FindFirstChild("Attack") or re:FindFirstChild("Punch") if at then at:FireServer(tc) end end end) pcall(function() local mo=p:GetMouse() if mo then mo.Button1Down:Fire() end end) end
+local function aL() if hbC then hbC:Disconnect() end hbC=r.Heartbeat:Connect(function() if not iA then return end local ch,hr=gC() if not ch or not hr then st.Text="Status: Waiting..." return end local ta=nil if c.KillMode then if lT then local tc=lT.Character local th=tc and tc:FindFirstChild("Humanoid") if not tc or not th or th.Health<=0 then lT=nil end end if not lT then local ne=fN() if ne then lT=ne end end ta=lT else lT=nil ta=fN() end if ta then if ta~=cT then cT=ta st.Text="Status: "..ta.Name pz="idle" cW={} wi=1 lTP=Vector3.zero end local tc=ta.Character local th=tc and tc:FindFirstChild("HumanoidRootPart") if not th then return end local sp=tonumber(spB.Text) or 100 if sp<5 then sp=5 end if sp>500 then sp=500 end local ds=tonumber(dB.Text) or 3 if ds<0.5 then ds=0.5 end local cp=hr.Position local tcF=th.CFrame local bw=-tcF.LookVector local fp2=tcF.Position+bw*ds if c.KillMode then local th2=tc:FindFirstChild("Humanoid") local thh=th2 and th2.Health or 0 if thh>0 and (cp-th.Position).Magnitude<8 then pz="attacking" ph.Text="Phase: Attack ("..math.floor(thh)..")" sFP() hr.AssemblyLinearVelocity=Vector3.zero hr.CFrame=CFrame.new(fp2,Vector3.new(tcF.Position.X,fp2.Y,tcF.Position.Z)) tA(tc) return end end local dtf=(cp-fp2).Magnitude if dtf<5 then sFP() hr.AssemblyLinearVelocity=Vector3.zero hr.CFrame=CFrame.new(fp2,Vector3.new(tcF.Position.X,fp2.Y,tcF.Position.Z)) pz="done" ph.Text="Phase: Stick" return end local tm=(th.Position-lTP).Magnitude>15 local nn=#cW==0 or wi>#cW or tm if nn then local nw=tick() if (nw-lPT)>0.3 then lPT=nw lTP=th.Position if dtf<30 or cS(cp,fp2) then cW={fp2} wi=1 ph.Text="Phase: Direct" else cW=fP(cp,fp2) wi=1 ph.Text="Phase: Path" end end end local mt=fp2 if #cW>0 and wi<=#cW then mt=cW[wi] if (mt-cp).Magnitude<6 then wi=wi+1 if wi>#cW then mt=fp2 else mt=cW[wi] end end end fT(mt,tcF.Position,sp) else cT=nil pz="idle" st.Text="Status: No player" ph.Text="Phase: -" cW={} sFP() local ch2,hr2=gC() if hr2 then hr2.AssemblyLinearVelocity=Vector3.zero end end end) end
+local iS=false local sCn=nil local oWS=16 local oJP=50
+local function gH() local ch=p.Character if not ch then return nil end return ch:FindFirstChild("Humanoid") end
+local function sS() local hu=gH() if not hu then sst.Text="Status: No humanoid" return false end oWS=hu.WalkSpeed oJP=hu.JumpPower if sCn then sCn:Disconnect() sCn=nil end sCn=r.Heartbeat:Connect(function() if not iS then return end local ch=p.Character if not ch then return end local hm=ch:FindFirstChild("Humanoid") if not hm then return end local sp=tonumber(spd.Text) or 100 if sp<16 then sp=16 end if sp>1000 then sp=1000 end hm.WalkSpeed=sp hm.JumpPower=sp/2 end) sst.Text="Status: RUNNING" return true end
+local function stS() if sCn then sCn:Disconnect() sCn=nil end local hu=gH() if hu then hu.WalkSpeed=oWS hu.JumpPower=oJP end sst.Text="Status: STOPPED" end
+local function sF2(on) if on then if iA then return end iA=true tb.Text="FLY ON" tb.BackgroundColor3=Color3.fromRGB(50,200,50) fb.Text="FLY: ON" fb.BackgroundColor3=Color3.fromRGB(50,200,50) st.Text="Status: RUNNING..." pz="idle" aL() else iA=false if hbC then hbC:Disconnect() hbC=nil end sFP() tb.Text="FLY OFF" tb.BackgroundColor3=Color3.fromRGB(50,50,50) fb.Text="FLY: OFF" fb.BackgroundColor3=Color3.fromRGB(50,50,50) st.Text="Status: STOPPED" ph.Text="Phase: -" cT=nil lT=nil pz="idle" cW={} local ch,hr=gC() if hr then hr.AssemblyLinearVelocity=Vector3.zero end end end
+local function sS2(on) if on then iS=true stg.Text="SPD ON" stg.BackgroundColor3=Color3.fromRGB(50,200,50) sb.Text="SPD: ON" sb.BackgroundColor3=Color3.fromRGB(50,200,50) sS() else iS=false stg.Text="SPD OFF" stg.BackgroundColor3=Color3.fromRGB(50,50,50) sb.Text="SPD: OFF" sb.BackgroundColor3=Color3.fromRGB(50,50,50) stS() end end
+fb.MouseButton1Click:Connect(function() sF2(not iA) end) sb.MouseButton1Click:Connect(function() sS2(not iS) end)
+local function uK() if c.KillMode then kt.Text="KILL: ON" kt.BackgroundColor3=Color3.fromRGB(200,50,50) else kt.Text="KILL: OFF" kt.BackgroundColor3=Color3.fromRGB(60,60,60) lT=nil end end
+kt.MouseButton1Click:Connect(function() c.KillMode=not c.KillMode lT=nil uK() sC() end) uK()
+local fL=c.FlyLocked local sL=c.SpeedLocked
+local function uFL() if fL then fl.Text="Lock: ON" fl.BackgroundColor3=Color3.fromRGB(200,100,50) fb.Draggable=false else fl.Text="Lock: OFF" fl.BackgroundColor3=Color3.fromRGB(60,60,60) fb.Draggable=true end end
+local function uSL() if sL then sl.Text="Lock: ON" sl.BackgroundColor3=Color3.fromRGB(200,100,50) sb.Draggable=false else sl.Text="Lock: OFF" sl.BackgroundColor3=Color3.fromRGB(60,60,60) sb.Draggable=true end end
+fl.MouseButton1Click:Connect(function() fL=not fL c.FlyLocked=fL uFL() sC() end) sl.MouseButton1Click:Connect(function() sL=not sL c.SpeedLocked=sL uSL() sC() end) uFL() uSL()
+frb.MouseButton1Click:Connect(function() fb.Visible=not fb.Visible fp.FlyVisible=fb.Visible frb.Text=fb.Visible and "HIDE FLOAT" or "SHOW FLOAT" fil.Text="Float: "..(fb.Visible and "visible" or "hidden") fil.TextColor3=fb.Visible and Color3.fromRGB(150,255,150) or Color3.fromRGB(255,150,150) sF() end)
+srb.MouseButton1Click:Connect(function() sb.Visible=not sb.Visible fp.SpdVisible=sb.Visible srb.Text=sb.Visible and "HIDE FLOAT" or "SHOW FLOAT" sF() end)
+sv.MouseButton1Click:Connect(function() scc=scc+1 if scc==1 then sv.Text="?" sv.BackgroundColor3=Color3.fromRGB(200,150,50) if srt then task.cancel(srt) end srt=task.spawn(function() task.wait(3) scc=0 sv.Text="S" sv.BackgroundColor3=Color3.fromRGB(80,80,80) end) elseif scc>=2 then if srt then task.cancel(srt) srt=nil end c.Height=tonumber(hB.Text) or 10 c.Distance=tonumber(dB.Text) or 3 c.Speed=tonumber(spB.Text) or 100 c.FlyLocked=fL c.SpeedLocked=sL local ok=pcall(function() writefile(CF,h:JSONEncode(c)) end) if ok then sv.Text="OK" sv.BackgroundColor3=Color3.fromRGB(50,200,50) else sv.Text="X" sv.BackgroundColor3=Color3.fromRGB(200,50,50) end scc=0 task.spawn(function() task.wait(1.5) sv.Text="S" sv.BackgroundColor3=Color3.fromRGB(80,80,80) end) end end)
+local mz=false mb.MouseButton1Click:Connect(function() mz=not mz if mz then sc.Visible=false fr.Size=UDim2.new(0,160,0,20) mb.Text="+" else sc.Visible=true fr.Size=UDim2.new(0,160,0,240) mb.Text="-" end end)
+tb.MouseButton1Click:Connect(function() sF2(not iA) end) stg.MouseButton1Click:Connect(function() sS2(not iS) end)
+cb.MouseButton1Click:Connect(function() iA=false iS=false if hbC then hbC:Disconnect() end if srt then task.cancel(srt) end sFP() stS() sC() sF() sg:Destroy() end)
+p.CharacterAdded:Connect(function() if iS then task.wait(0.5) sS() end end)
+local function mD(b,isF) local dr=false local sp,sm b.InputBegan:Connect(function(inp) if (inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch) and b.Draggable then dr=true sp=b.Position sm=inp.Position end end) b.InputChanged:Connect(function(inp) if dr and (inp.UserInputType==Enum.UserInputType.MouseMovement or inp.UserInputType==Enum.UserInputType.Touch) then local de=inp.Position-sm local nx=sp.X.Scale+de.X/sg.AbsoluteSize.X local ny=sp.Y.Scale+de.Y/sg.AbsoluteSize.Y b.Position=UDim2.new(nx,0,ny,0) end end) b.InputEnded:Connect(function(inp) if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then if dr then dr=false if isF then fp.FlyX=b.Position.X.Scale fp.FlyY=b.Position.Y.Scale else fp.SpdX=b.Position.X.Scale fp.SpdY=b.Position.Y.Scale end sF() end end end) end
+mD(fb,true) mD(sb,false)
+frb.Text=fp.FlyVisible and "HIDE FLOAT" or "SHOW FLOAT" srb.Text=fp.SpdVisible and "HIDE FLOAT" or "SHOW FLOAT" fil.Text="Float: "..(fp.FlyVisible and "visible" or "hidden")        if decoded.SpdVisible ~= nil then floatPos.SpdVisible = decoded.SpdVisible end
     end
 end)
 
