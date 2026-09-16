@@ -1,0 +1,588 @@
+local player = game.Players.LocalPlayer
+local runService = game:GetService("RunService")
+local httpService = game:GetService("HttpService")
+local pathfindingService = game:GetService("PathfindingService")
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ToolsGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player.PlayerGui
+
+local CONFIG_FILE = "AutoTeleConfig.json"
+local FLOAT_FILE = "AutoTeleFloat.json"
+
+local config = { Height = 10, Distance = 3, Speed = 100, FlyLocked = false, SpeedLocked = false, KillMode = false }
+local floatPos = {
+    FlyX = 0.02, FlyY = 0.4,
+    SpdX = 0.02, SpdY = 0.5,
+    FlyVisible = true, SpdVisible = true
+}
+
+pcall(function()
+    if isfile and isfile(CONFIG_FILE) then
+        local decoded = httpService:JSONDecode(readfile(CONFIG_FILE))
+        if decoded.Height then config.Height = decoded.Height end
+        if decoded.Distance then config.Distance = decoded.Distance end
+        if decoded.Speed then config.Speed = decoded.Speed end
+        if decoded.FlyLocked ~= nil then config.FlyLocked = decoded.FlyLocked end
+        if decoded.SpeedLocked ~= nil then config.SpeedLocked = decoded.SpeedLocked end
+        if decoded.KillMode ~= nil then config.KillMode = decoded.KillMode end
+    end
+    if isfile and isfile(FLOAT_FILE) then
+        local decoded = httpService:JSONDecode(readfile(FLOAT_FILE))
+        if decoded.FlyX then floatPos.FlyX = decoded.FlyX end
+        if decoded.FlyY then floatPos.FlyY = decoded.FlyY end
+        if decoded.SpdX then floatPos.SpdX = decoded.SpdX end
+        if decoded.SpdY then floatPos.SpdY = decoded.SpdY end
+        if decoded.FlyVisible ~= nil then floatPos.FlyVisible = decoded.FlyVisible end
+        if decoded.SpdVisible ~= nil then floatPos.SpdVisible = decoded.SpdVisible end
+    end
+end)
+
+local function saveFloat()
+    pcall(function()
+        writefile(FLOAT_FILE, httpService:JSONEncode(floatPos))
+    end)
+end
+
+local function saveConfig()
+    pcall(function()
+        writefile(CONFIG_FILE, httpService:JSONEncode(config))
+    end)
+end
+
+local flyFloatBtn = Instance.new("TextButton")
+flyFloatBtn.Size = UDim2.new(0, 60, 0, 30)
+flyFloatBtn.Position = UDim2.new(floatPos.FlyX, 0, floatPos.FlyY, 0)
+flyFloatBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+flyFloatBtn.BorderSizePixel = 1
+flyFloatBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+flyFloatBtn.Text = "FLY: OFF"
+flyFloatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyFloatBtn.TextScaled = true
+flyFloatBtn.Visible = floatPos.FlyVisible
+flyFloatBtn.Parent = screenGui
+
+local spdFloatBtn = Instance.new("TextButton")
+spdFloatBtn.Size = UDim2.new(0, 60, 0, 30)
+spdFloatBtn.Position = UDim2.new(floatPos.SpdX, 0, floatPos.SpdY, 0)
+spdFloatBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+spdFloatBtn.BorderSizePixel = 1
+spdFloatBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+spdFloatBtn.Text = "SPD: OFF"
+spdFloatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+spdFloatBtn.TextScaled = true
+spdFloatBtn.Visible = floatPos.SpdVisible
+spdFloatBtn.Parent = screenGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 160, 0, 240)
+frame.Position = UDim2.new(0.5, -80, 0.5, -120)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 1
+frame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
+
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 20)
+header.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+header.BorderSizePixel = 0
+header.Parent = frame
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(0, 60, 0, 20)
+titleLabel.Position = UDim2.new(0, 5, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Tools"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextScaled = true
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Parent = header
+
+local saveButton = Instance.new("TextButton")
+saveButton.Size = UDim2.new(0, 16, 0, 16)
+saveButton.Position = UDim2.new(1, -76, 0, 2)
+saveButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+saveButton.Text = "S"
+saveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+saveButton.TextScaled = true
+saveButton.Parent = header
+
+local minButton = Instance.new("TextButton")
+minButton.Size = UDim2.new(0, 26, 0, 16)
+minButton.Position = UDim2.new(1, -58, 0, 2)
+minButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+minButton.Text = "-"
+minButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+minButton.TextScaled = true
+minButton.Parent = header
+
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 16, 0, 16)
+closeButton.Position = UDim2.new(1, -20, 0, 2)
+closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.TextScaled = true
+closeButton.Parent = header
+
+local scroll = Instance.new("ScrollingFrame")
+scroll.Size = UDim2.new(1, 0, 1, -20)
+scroll.Position = UDim2.new(0, 0, 0, 20)
+scroll.BackgroundTransparency = 1
+scroll.BorderSizePixel = 0
+scroll.ScrollBarThickness = 4
+scroll.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 250)
+scroll.Parent = frame
+
+local sec1 = Instance.new("Frame")
+sec1.Size = UDim2.new(1, -6, 0, 142)
+sec1.Position = UDim2.new(0, 3, 0, 3)
+sec1.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+sec1.BorderSizePixel = 1
+sec1.BorderColor3 = Color3.fromRGB(80, 80, 120)
+sec1.Parent = scroll
+
+local sec1Title = Instance.new("TextLabel")
+sec1Title.Size = UDim2.new(1, 0, 0, 14)
+sec1Title.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+sec1Title.BorderSizePixel = 0
+sec1Title.Text = "FLY"
+sec1Title.TextColor3 = Color3.fromRGB(150, 200, 255)
+sec1Title.TextScaled = true
+sec1Title.Parent = sec1
+
+local function makeLabel(txt, y, parent)
+    local l = Instance.new("TextLabel")
+    l.Size = UDim2.new(0, 55, 0, 12)
+    l.Position = UDim2.new(0, 5, 0, y)
+    l.BackgroundTransparency = 1
+    l.Text = txt
+    l.TextColor3 = Color3.fromRGB(255, 255, 255)
+    l.TextScaled = true
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.Parent = parent
+    return l
+end
+
+local function makeBox(txt, y, parent)
+    local b = Instance.new("TextBox")
+    b.Size = UDim2.new(0, 55, 0, 12)
+    b.Position = UDim2.new(0, 62, 0, y)
+    b.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Text = txt
+    b.TextScaled = true
+    b.Parent = parent
+    return b
+end
+
+makeLabel("H:", 18, sec1)
+local heightBox = makeBox(tostring(config.Height), 18, sec1)
+
+local hSpdLabel = Instance.new("TextLabel")
+hSpdLabel.Size = UDim2.new(0, 20, 0, 12)
+hSpdLabel.Position = UDim2.new(0, 122, 0, 18)
+hSpdLabel.BackgroundTransparency = 1
+hSpdLabel.Text = "S:"
+hSpdLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+hSpdLabel.TextScaled = true
+hSpdLabel.TextXAlignment = Enum.TextXAlignment.Left
+hSpdLabel.Parent = sec1
+
+local speedBox = Instance.new("TextBox")
+speedBox.Size = UDim2.new(0, 30, 0, 12)
+speedBox.Position = UDim2.new(1, -32, 0, 18)
+speedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedBox.Text = tostring(config.Speed)
+speedBox.TextScaled = true
+speedBox.Parent = sec1
+
+makeLabel("Dist:", 34, sec1)
+local distBox = makeBox(tostring(config.Distance), 34, sec1)
+
+local killToggle = Instance.new("TextButton")
+killToggle.Size = UDim2.new(0, 85, 0, 14)
+killToggle.Position = UDim2.new(1, -90, 0, 34)
+killToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+killToggle.Text = "KILL: OFF"
+killToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+killToggle.TextScaled = true
+killToggle.Parent = sec1
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(0, 145, 0, 12)
+statusLabel.Position = UDim2.new(0, 5, 0, 52)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Status: IDLE"
+statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusLabel.TextScaled = true
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.Parent = sec1
+
+local phaseLabel = Instance.new("TextLabel")
+phaseLabel.Size = UDim2.new(0, 145, 0, 12)
+phaseLabel.Position = UDim2.new(0, 5, 0, 66)
+phaseLabel.BackgroundTransparency = 1
+phaseLabel.Text = "Phase: -"
+phaseLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+phaseLabel.TextScaled = true
+phaseLabel.TextXAlignment = Enum.TextXAlignment.Left
+phaseLabel.Parent = sec1
+
+local flyLockBtn = Instance.new("TextButton")
+flyLockBtn.Size = UDim2.new(0, 70, 0, 14)
+flyLockBtn.Position = UDim2.new(0, 5, 0, 82)
+flyLockBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+flyLockBtn.Text = "Lock: OFF"
+flyLockBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyLockBtn.TextScaled = true
+flyLockBtn.Parent = sec1
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 70, 0, 14)
+toggleButton.Position = UDim2.new(1, -75, 0, 82)
+toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleButton.Text = "FLY OFF"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.TextScaled = true
+toggleButton.Parent = sec1
+
+local flyReleaseBtn = Instance.new("TextButton")
+flyReleaseBtn.Size = UDim2.new(1, -10, 0, 14)
+flyReleaseBtn.Position = UDim2.new(0, 5, 0, 100)
+flyReleaseBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+flyReleaseBtn.Text = "HIDE FLOAT"
+flyReleaseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyReleaseBtn.TextScaled = true
+flyReleaseBtn.Parent = sec1
+
+local flyInfoLabel = Instance.new("TextLabel")
+flyInfoLabel.Size = UDim2.new(1, -10, 0, 12)
+flyInfoLabel.Position = UDim2.new(0, 5, 0, 118)
+flyInfoLabel.BackgroundTransparency = 1
+flyInfoLabel.Text = "Float: visible"
+flyInfoLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
+flyInfoLabel.TextScaled = true
+flyInfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+flyInfoLabel.Parent = sec1
+
+local sec2 = Instance.new("Frame")
+sec2.Size = UDim2.new(1, -6, 0, 96)
+sec2.Position = UDim2.new(0, 3, 0, 149)
+sec2.BackgroundColor3 = Color3.fromRGB(45, 40, 40)
+sec2.BorderSizePixel = 1
+sec2.BorderColor3 = Color3.fromRGB(120, 80, 80)
+sec2.Parent = scroll
+
+local sec2Title = Instance.new("TextLabel")
+sec2Title.Size = UDim2.new(1, 0, 0, 14)
+sec2Title.BackgroundColor3 = Color3.fromRGB(80, 50, 50)
+sec2Title.BorderSizePixel = 0
+sec2Title.Text = "SPEED"
+sec2Title.TextColor3 = Color3.fromRGB(255, 150, 150)
+sec2Title.TextScaled = true
+sec2Title.Parent = sec2
+
+makeLabel("Spd:", 18, sec2)
+local spdBox = makeBox("100", 18, sec2)
+
+local spdStatusLabel = Instance.new("TextLabel")
+spdStatusLabel.Size = UDim2.new(1, -10, 0, 12)
+spdStatusLabel.Position = UDim2.new(0, 5, 0, 34)
+spdStatusLabel.BackgroundTransparency = 1
+spdStatusLabel.Text = "Status: IDLE"
+spdStatusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+spdStatusLabel.TextScaled = true
+spdStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+spdStatusLabel.Parent = sec2
+
+local spdLockBtn = Instance.new("TextButton")
+spdLockBtn.Size = UDim2.new(0, 70, 0, 14)
+spdLockBtn.Position = UDim2.new(0, 5, 0, 50)
+spdLockBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+spdLockBtn.Text = "Lock: OFF"
+spdLockBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+spdLockBtn.TextScaled = true
+spdLockBtn.Parent = sec2
+
+local speedToggle = Instance.new("TextButton")
+speedToggle.Size = UDim2.new(0, 70, 0, 14)
+speedToggle.Position = UDim2.new(1, -75, 0, 50)
+speedToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+speedToggle.Text = "SPD OFF"
+speedToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedToggle.TextScaled = true
+speedToggle.Parent = sec2
+
+local spdReleaseBtn = Instance.new("TextButton")
+spdReleaseBtn.Size = UDim2.new(1, -10, 0, 14)
+spdReleaseBtn.Position = UDim2.new(0, 5, 0, 68)
+spdReleaseBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+spdReleaseBtn.Text = "HIDE FLOAT"
+spdReleaseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+spdReleaseBtn.TextScaled = true
+spdReleaseBtn.Parent = sec2
+
+local isAuto = false
+local heartbeatConn = nil
+local currentTarget = nil
+local lockedTarget = nil
+local phase = "idle"
+local currentWaypoints = {}
+local waypointIndex = 1
+local lastPathTime = 0
+local lastTargetPos = Vector3.zero
+local saveClickCount = 0
+local saveResetThread = nil
+
+local function getCharacter()
+    local char = player.Character
+    if not char then return nil end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+    local humanoid = char:FindFirstChild("Humanoid")
+    if not humanoid or humanoid.Health <= 0 then return nil end
+    return char, hrp, humanoid
+end
+
+local function findNearest()
+    local char, myHrp = getCharacter()
+    if not char or not myHrp then return nil end
+    local myPos = myHrp.Position
+    local nearest = nil
+    local nearestDist = math.huge
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= player and p.Character then
+            local humanoid = p.Character:FindFirstChild("Humanoid")
+            if humanoid and humanoid.Health > 0 then
+                local tHrp = p.Character:FindFirstChild("HumanoidRootPart")
+                if tHrp then
+                    local dist = (tHrp.Position - myPos).Magnitude
+                    if dist < nearestDist then
+                        nearestDist = dist
+                        nearest = p
+                    end
+                end
+            end
+        end
+    end
+    return nearest
+end
+
+local rayParams = RaycastParams.new()
+rayParams.FilterType = Enum.RaycastFilterType.Exclude
+rayParams.IgnoreWater = true
+
+local function canSee(fromPos, toPos)
+    rayParams.FilterDescendantsInstances = {player.Character}
+    local result = workspace:Raycast(fromPos, toPos - fromPos, rayParams)
+    return result == nil
+end
+
+local function findPath(startPos, endPos)
+    if (startPos - endPos).Magnitude < 30 or canSee(startPos, endPos) then
+        return {endPos}
+    end
+    
+    local path = pathfindingService:CreatePath({
+        AgentRadius = 3,
+        AgentHeight = 6,
+        AgentCanJump = true,
+        AgentCanClimb = true,
+        WaypointSpacing = 8,
+        Costs = {
+            Water = 20,
+        }
+    })
+    
+    local ok = pcall(function()
+        path:ComputeAsync(startPos, endPos)
+    end)
+    
+    if not ok or path.Status ~= Enum.PathStatus.Success then
+        return {endPos}
+    end
+    
+    local waypoints = path:GetWaypoints()
+    local result = {}
+    for _, wp in ipairs(waypoints) do
+        table.insert(result, wp.Position)
+    end
+    
+    if #result == 0 then
+        return {endPos}
+    end
+    
+    return result
+end
+
+local function getOrCreateAttachment(hrp)
+    local att = hrp:FindFirstChild("FlyRootAttachment")
+    if not att then
+        att = Instance.new("Attachment")
+        att.Name = "FlyRootAttachment"
+        att.Parent = hrp
+    end
+    return att
+end
+
+local function getOrCreateAlignPos(hrp, speed)
+    local alignPos = hrp:FindFirstChild("FlyAlignPos")
+    if not alignPos then
+        alignPos = Instance.new("AlignPosition")
+        alignPos.Name = "FlyAlignPos"
+        alignPos.Attachment0 = getOrCreateAttachment(hrp)
+        alignPos.Mode = Enum.PositionAlignmentMode.OneAttachment
+        alignPos.MaxForce = 500000
+        alignPos.MaxVelocity = speed
+        alignPos.Responsiveness = 60
+        alignPos.ApplyAtCenterOfMass = true
+        alignPos.Parent = hrp
+    end
+    alignPos.MaxVelocity = speed
+    return alignPos
+end
+
+local function getOrCreateAlignOri(hrp)
+    local alignOri = hrp:FindFirstChild("FlyAlignOri")
+    if not alignOri then
+        alignOri = Instance.new("AlignOrientation")
+        alignOri.Name = "FlyAlignOri"
+        alignOri.Attachment0 = getOrCreateAttachment(hrp)
+        alignOri.Mode = Enum.OrientationAlignmentMode.OneAttachment
+        alignOri.MaxTorque = 500000
+        alignOri.Responsiveness = 60
+        alignOri.Parent = hrp
+    end
+    return alignOri
+end
+
+local function stopFlyPhysics()
+    local char, hrp = getCharacter()
+    if not hrp then return end
+    local a1 = hrp:FindFirstChild("FlyAlignPos")
+    local a2 = hrp:FindFirstChild("FlyAlignOri")
+    local a3 = hrp:FindFirstChild("FlyRootAttachment")
+    if a1 then a1:Destroy() end
+    if a2 then a2:Destroy() end
+    if a3 then a3:Destroy() end
+end
+
+local function flyTo(targetPos, facePos, speed)
+    local char, hrp = getCharacter()
+    if not char or not hrp then return end
+    local currentPos = hrp.Position
+    local direction = targetPos - currentPos
+    local distance = direction.Magnitude
+    
+    if distance < 0.5 then
+        stopFlyPhysics()
+        hrp.AssemblyLinearVelocity = Vector3.zero
+        return
+    end
+    
+    local heightOffset = tonumber(heightBox.Text) or 10
+    if heightOffset < 0 then heightOffset = 0 end
+    if heightOffset > 50 then heightOffset = 50 end
+    
+    local targetY = targetPos.Y + heightOffset
+    local finalTarget = Vector3.new(targetPos.X, targetY, targetPos.Z)
+    
+    local alignPos = getOrCreateAlignPos(hrp, speed)
+    alignPos.Position = finalTarget
+    
+    local alignOri = getOrCreateAlignOri(hrp)
+    local lookDir = Vector3.new(facePos.X - currentPos.X, 0, facePos.Z - currentPos.Z)
+    if lookDir.Magnitude > 0.1 then
+        alignOri.CFrame = CFrame.lookAt(Vector3.zero, lookDir.Unit)
+    end
+end
+
+local function tryAttack(targetChar)
+    if not targetChar then return end
+    local myChar = player.Character
+    if not myChar then return end
+    local tool = myChar:FindFirstChildOfClass("Tool")
+    if tool then
+        tool:Activate()
+    end
+    pcall(function()
+        local remote = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+        if remote then
+            local attack = remote:FindFirstChild("Attack") or remote:FindFirstChild("Punch")
+            if attack then
+                attack:FireServer(targetChar)
+            end
+        end
+    end)
+    pcall(function()
+        local mouse = player:GetMouse()
+        if mouse then
+            mouse.Button1Down:Fire()
+        end
+    end)
+end
+
+local function autoLoop()
+    if heartbeatConn then heartbeatConn:Disconnect() end
+    heartbeatConn = runService.Heartbeat:Connect(function()
+        if not isAuto then return end
+        
+        local char, hrp = getCharacter()
+        if not char or not hrp then
+            statusLabel.Text = "Status: Waiting..."
+            return
+        end
+        
+        local target = nil
+        
+        if config.KillMode then
+            if lockedTarget then
+                local tChar = lockedTarget.Character
+                local tHum = tChar and tChar:FindFirstChild("Humanoid")
+                if not tChar or not tHum or tHum.Health <= 0 then
+                    lockedTarget = nil
+                end
+            end
+            if not lockedTarget then
+                local nearest = findNearest()
+                if nearest then lockedTarget = nearest end
+            end
+            target = lockedTarget
+        else
+            lockedTarget = nil
+            target = findNearest()
+        end
+        
+        if target then
+            if target ~= currentTarget then
+                currentTarget = target
+                statusLabel.Text = "Status: " .. target.Name
+                phase = "idle"
+                currentWaypoints = {}
+                waypointIndex = 1
+                lastTargetPos = Vector3.zero
+            end
+            
+            local tChar = target.Character
+            local tHrp = tChar and tChar:FindFirstChild("HumanoidRootPart")
+            if not tHrp then return end
+            
+            local speed = tonumber(speedBox.Text) or 100
+            if speed < 5 then speed = 5 end
+            if speed > 500 then speed = 500 end
+            local dist = tonumber(distBox.Text) or 3
+            if dist < 0.5 then dist = 0.5 end
+            
+            local currentPos = hrp.Position
+            local tCFrame = tHrp.CFrame
+            local backward = -tCFrame.LookVector
+            local finalPos = tCFrame.Position + backward * dist
+            
+            if config.KillMode then
+                local tHumanoid = tChar:FindFirstChild("Humanoid")
+             
